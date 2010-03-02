@@ -76,7 +76,7 @@ public class AnonymousGitService implements AbstractService {
 
 	private Repository getRepository(String reposname) throws IOException {
 		Repository db;
-		File path = new File("gitcache/test/.git").getCanonicalFile();
+		File path = new File("gitcache/test").getCanonicalFile();
 		db = new Repository(path);
 		return db;
 	}
