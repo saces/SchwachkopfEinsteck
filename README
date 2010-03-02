@@ -10,4 +10,16 @@ Source Version for the impatient:
   Clone/update the repository, cd into it, update submodules and type 'ant'.
   Grab the plugin from dist/SchwachkopfEinsteck.jar and load it…
 
+get sources (a fresh clone):
+  get the super project
+    git clone git://github.com/saces/SchwachkopfEinsteck.git SchwachkopfEinsteck
+    cd SchwachkopfEinsteck
+  init and update submodules
+    git submodule init
+    git submodule update
 
+update sources:
+  update the super project
+    git pull git://github.com/saces/SchwachkopfEinsteck.git
+  update submodules
+    git submodule update
