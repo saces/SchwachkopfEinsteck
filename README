@@ -3,8 +3,8 @@ SchwachkopfEinsteck
 
 'SchwachkopfEinsteck' is german, it just translates to 'GitPlugin' :)
 
-Prebuilt version:
-  Just load it, it should go intuitive…
+Prebuilt version: http://github.com/saces/SchwachkopfEinsteck/downloads
+  Just load the latest, it should go intuitive…
 
 Source Version for the impatient:
   Clone/update the repository, cd into it, update submodules and type 'ant'.
