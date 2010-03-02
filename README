@@ -23,3 +23,31 @@ update sources:
     git pull git://github.com/saces/SchwachkopfEinsteck.git
   update submodules
     git submodule update
+
+build:
+  cd into the project root and type 'ant'.
+  The new created plugin will be dist/SchwachkopfEinsteck.jar
+
+configuration:
+  After loading the plugin visit http://127.0.0.1:8888/GitPlugin/admin or
+  'Git Tools'->'Admin' in the menu. Adjust the host and port if needed
+  (usually this should not be necessary) and press 'Start'.
+
+Using It:
+
+  warm up round: (testing the anonymous git transport)
+    create a bare repository in gitcache/test
+      cd <freenetdir>
+      mkdir gitcache
+      cd gitcache
+      mkdir test
+      cd test
+      git --bare init
+
+  the repository name ('test') is hardcoded for testing the anonymous git
+  transport. so any remote repository ends up in the repository you just
+  created.
+    git push git://127.0.0.1:9418/ignoredreposname
+    git pull git://127.0.0.1:9418/ignoredreposname
+
+  happy warm up testing ;)
