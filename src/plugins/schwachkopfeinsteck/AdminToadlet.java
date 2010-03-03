@@ -20,10 +20,12 @@ public class AdminToadlet extends WebInterfaceToadlet {
 	private static final String PARAM_PORT = "port";
 	private static final String PARAM_BINDTO = "bindto";
 	private static final String PARAM_ALLOWEDHOSTS = "allowedhosts";
+	private static final String PARAM_CACHEDIR = "chachedir";
+	private static final String PARAM_READONLY = "readonly";
+
 	private static final String CMD_START = "start";
 	private static final String CMD_STOP = "stop";
 	private static final String CMD_RESTART = "restart";
-	private static final String PARAM_CACHEDIR = "chachedir";
 	private static final String CMD_APPLY = "apply";
 
 	private final AnonymousGitDaemon daemon;
@@ -59,8 +61,10 @@ public class AdminToadlet extends WebInterfaceToadlet {
 			String bindTo = request.getPartAsString(PARAM_BINDTO, 50);
 			int port = request.getIntPart(PARAM_PORT, 9481);
 			String allowedHosts = request.getPartAsString(PARAM_ALLOWEDHOSTS, 50);
+			String ro = request.getPartAsString(PARAM_READONLY, 50);
 			if (request.isPartSet(CMD_START)) {
 				daemon.setAdress(bindTo, port, allowedHosts, false);
+				daemon.setReadOnly(ro.length() > 0);
 				daemon.start();
 			} else if (request.isPartSet(CMD_RESTART)) {
 				daemon.stop();
@@ -71,6 +75,7 @@ public class AdminToadlet extends WebInterfaceToadlet {
 					// ignored
 				}
 				daemon.setAdress(bindTo, port, allowedHosts, false);
+				daemon.setReadOnly(ro.length() > 0);
 				daemon.start();
 			} else {
 				errors.add("Unknown command.");
@@ -121,6 +126,15 @@ public class AdminToadlet extends WebInterfaceToadlet {
 		boxForm.addChild("#", "Allowed hosts: \u00a0 ");
 		boxForm.addChild("input", new String[] { "type", "name", "size", "value"}, new String[] { "text", PARAM_ALLOWEDHOSTS, "20", "127.0.0.1" });
 		boxForm.addChild("br");
+		if (daemon.isReadOnly()) {
+			boxForm.addChild("input", new String[] { "type", "name", "value", "checked" }, new String[] { "checkbox", PARAM_READONLY, "ok", "checked" });
+		} else {
+			boxForm.addChild("input", new String[] { "type", "name", "value" }, new String[] { "checkbox", PARAM_READONLY, "ok" });
+		}
+		boxForm.addChild("#", "\u00a0Read only access");
+		boxForm.addChild("br");
+		boxForm.addChild("br");
+
 		if (daemon.isRunning()) {
 			boxForm.addChild("input", new String[] { "type", "name", "value", "disabled" }, new String[] { "submit", CMD_START, "Start", "disabled" });
 			boxForm.addChild("#", "\u00a0 ");
@@ -143,5 +157,4 @@ public class AdminToadlet extends WebInterfaceToadlet {
 		boxForm.addChild("br");
 		boxForm.addChild("#", "Basic code for SSH (jSch) is in, just send patches ;)");
 	}
-
 }

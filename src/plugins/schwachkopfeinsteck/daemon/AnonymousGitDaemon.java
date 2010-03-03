@@ -9,6 +9,7 @@ import freenet.support.incubation.server.AbstractService;
 public class AnonymousGitDaemon extends AbstractServer {
 
 	private File reposdir;
+	private boolean isReadOnly = true;
 
 	public AnonymousGitDaemon(String servername, Executor executor) {
 		super(servername, executor);
@@ -16,7 +17,7 @@ public class AnonymousGitDaemon extends AbstractServer {
 
 	@Override
 	protected AbstractService getService() {
-		return new AnonymousGitService();
+		return new AnonymousGitService(isReadOnly());
 	}
 
 	public void setCacheDir(String dir) {
@@ -33,6 +34,14 @@ public class AnonymousGitDaemon extends AbstractServer {
 
 	public String getCacheDir() {
 		return reposdir.getPath();
+	}
+
+	public void setReadOnly(boolean readOnly) {
+		isReadOnly = readOnly;
+	}
+
+	public boolean isReadOnly() {
+		return isReadOnly;
 	}
 
 }

@@ -25,8 +25,12 @@ public class AnonymousGitService implements AbstractService {
 	static {
 		Logger.registerClass(AnonymousGitService.class);
 	}
-	
-	private boolean isReadOnly = false;
+
+	private final boolean isReadOnly;
+
+	public AnonymousGitService(boolean readOnly) {
+		isReadOnly = readOnly;
+	}
 
 	public void handle(Socket sock) throws IOException {
 		InputStream rawIn = new BufferedInputStream(sock.getInputStream());
