@@ -1,7 +1,6 @@
 package plugins.schwachkopfeinsteck;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,11 +65,10 @@ public class AdminToadlet extends WebInterfaceToadlet {
 			} else if (request.isPartSet(CMD_RESTART)) {
 				daemon.stop();
 				try {
-					//sleep 3 sec, give the old bind a chanche to vanish…
+					//sleep 3 sec, give the old bind a chance to vanish…
 					Thread.sleep(3000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					// ignored
 				}
 				daemon.setAdress(bindTo, port, allowedHosts, false);
 				daemon.start();
