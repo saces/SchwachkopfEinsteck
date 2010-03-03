@@ -1,7 +1,5 @@
 package plugins.schwachkopfeinsteck;
 
-import java.net.InetSocketAddress;
-
 import plugins.schwachkopfeinsteck.daemon.AnonymousGitDaemon;
 
 import freenet.l10n.BaseL10n.LANGUAGE;
@@ -35,7 +33,11 @@ public class GitPlugin implements FredPlugin, FredPluginL10n, FredPluginThreadle
 
 		public void runPlugin(PluginRespirator pluginRespirator) {
 			pluginContext = new PluginContext(pluginRespirator);
+
+			// for now a single server only, later versions can do multiple servers
+			// and each can have its own cache/config
 			simpleDaemon = new AnonymousGitDaemon("huhu", pluginContext.node.executor);
+			simpleDaemon.setCacheDir("./gitcache");
 
 			webInterface = new WebInterface(pluginContext);
 			webInterface.addNavigationCategory(PLUGIN_URI+"/", PLUGIN_CATEGORY, "Git Toolbox", this);
@@ -47,11 +49,6 @@ public class GitPlugin implements FredPlugin, FredPluginL10n, FredPluginThreadle
 			webInterface.registerVisible(adminToadlet, PLUGIN_CATEGORY, "Admin", "Admin the git server");
 			RepositoriesToadlet reposToadlet = new RepositoriesToadlet(pluginContext, simpleDaemon);
 			webInterface.registerVisible(reposToadlet, PLUGIN_CATEGORY, "Repositories", "Create & Delete server's repositories");
-
-			InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 9418);
-			
-			simpleDaemon.setCacheDir("./gitcache");
-			//simpleDaemon.start(addr);
 		}
 
 		public void terminate() {
@@ -62,12 +59,12 @@ public class GitPlugin implements FredPlugin, FredPluginL10n, FredPluginThreadle
 		}
 
 		public String getString(String key) {
+			// return the key for now, l10n comes later
 			return key;
 		}
 
 		public void setLanguage(LANGUAGE newLanguage) {
-			// TODO Auto-generated method stub
-			
+			// ignored for now, l10n comes later
 		}
 
 		public String getVersion() {
