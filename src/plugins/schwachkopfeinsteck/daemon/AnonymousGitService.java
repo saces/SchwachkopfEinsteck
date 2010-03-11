@@ -14,6 +14,8 @@ import org.eclipse.jgit.transport.PacketLineIn;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.UploadPack;
 
+import freenet.keys.FreenetURI;
+import freenet.keys.InsertableUSK;
 import freenet.support.Logger;
 import freenet.support.incubation.server.AbstractService;
 
@@ -45,14 +47,22 @@ public class AnonymousGitService implements AbstractService {
 			cmd = cmd.substring(0, nul);
 		}
 
-		System.out.println("x händle request:"+cmd);
+		//System.out.println("x händle request:"+cmd);
 
 		String req[] = cmd.split(" ");
 		String command = req[0].startsWith("git-") ? req[0] : "git-" + req[0];
 		String reposName = req[1];
 
-		System.out.print("händle:"+command);
-		System.out.println(" for:"+reposName);
+		if (reposName.startsWith("/")) {
+			reposName = reposName.substring(1);
+		}
+
+		if (!reposName.endsWith("/")) {
+			reposName = reposName + '/';
+		}
+
+		//System.out.print("händle:"+command);
+		//System.out.println(" for:"+reposName);
 
 		if ("git-upload-pack".equals(command)) {
 			// the client want to have missing objects
@@ -74,13 +84,22 @@ public class AnonymousGitService implements AbstractService {
 			System.err.println("Unknown command: "+command);
 		}
 
-		System.out.println("x händle request: pfertsch");
+		//System.out.println("x händle request: pfertsch");
 
 	}
 
 	private Repository getRepository(String reposname) throws IOException {
+		FreenetURI uri = new FreenetURI(reposname);
+		if(uri.getExtra()[1] == 1) {
+			InsertableUSK iUsk = InsertableUSK.createInsertable(uri, false);
+			uri = iUsk.getURI();
+		}
+
+		String docName = uri.getDocName();
+		uri = uri.setKeyType("SSK");
+		String reposName = uri.setDocName(null).setMetaString(null).toString(false, false);
 		Repository db;
-		File path = new File("gitcache/test").getCanonicalFile();
+		File path = new File("gitcache", reposName + '@' + docName).getCanonicalFile();
 		db = new Repository(path);
 		return db;
 	}

@@ -35,7 +35,19 @@ configuration:
 
 Using It:
 
-  warm up round: (testing the anonymous git transport)
+  Qualifying: (testing local repository creation, anonymous git transport)
+    go to http://127.0.0.1:8889/GitPlugin/repos (Menu->Git Tools->Repositories)
+    if any repository is left from warmup round, delete it
+    create a new repository.
+    for now the URIs are noted in the repository description.
+      git push git://127.0.0.1:9418/USK@crypticbitpuree,ABC/name/0/
+      git pull git://127.0.0.1:9418/USK@crypticbitpuree,ADC/name/0/
+
+  happy qualifying ;)
+
+--obsolete--
+
+  Warmup round: (testing the anonymous git transport)
     create a bare repository in gitcache/test
       cd <freenetdir>
       mkdir gitcache
