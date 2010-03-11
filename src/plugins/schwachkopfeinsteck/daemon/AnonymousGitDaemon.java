@@ -36,6 +36,10 @@ public class AnonymousGitDaemon extends AbstractServer {
 		return reposdir.getPath();
 	}
 
+	public File getCacheDirFile() {
+		return reposdir;
+	}
+
 	public void setReadOnly(boolean readOnly) {
 		isReadOnly = readOnly;
 	}
