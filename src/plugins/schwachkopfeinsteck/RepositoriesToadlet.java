@@ -17,6 +17,8 @@ import freenet.clients.http.PageNode;
 import freenet.clients.http.ToadletContext;
 import freenet.clients.http.ToadletContextClosedException;
 import freenet.keys.FreenetURI;
+import freenet.node.useralerts.SimpleUserAlert;
+import freenet.node.useralerts.UserAlert;
 import freenet.support.HTMLNode;
 import freenet.support.Logger;
 import freenet.support.api.HTTPRequest;
@@ -394,10 +396,14 @@ public class RepositoriesToadlet extends WebInterfaceToadlet {
 			errors.add(e.getLocalizedMessage());
 			return;
 		}
-		String comment = "add a description here\n\n"+
-		"Due lack of a better idea the URIs are noted here:\n"+
+		String comment = "add a description here";
+
+		String alert = "Due lack of a better idea the URIs are noted here:\n"+
+		"Created Repository :"+dirName+"\n"+
 		"Pull URI: U"+rUri.substring(1)+'/'+name+"/0/\n"+
 		"Push URI: (Keep it secret) U"+iUri.substring(1)+'/'+name+"/0/\n";
+
+		pluginContext.clientCore.alerts.register(new SimpleUserAlert(false, "Repository created", alert, "Repository created", UserAlert.MINOR));
 
 		try {
 			updateDescription(reposDir, comment);
