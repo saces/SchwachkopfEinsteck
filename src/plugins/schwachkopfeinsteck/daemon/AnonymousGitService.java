@@ -130,8 +130,8 @@ public class AnonymousGitService implements AbstractService {
 
 	private void fatal(OutputStream rawOut, String string) throws IOException {
 		PacketLineOut pckOut = new PacketLineOut(rawOut);
-		byte[] data = string.getBytes();
-		pckOut.writeChannelPacket(SideBandOutputStream.CH_ERROR, data, 0, data.length);
+		byte[] data = ("ERR "+string).getBytes();
+		pckOut.writePacket(data);
 		pckOut.flush();
 		rawOut.flush();
 	}
