@@ -11,7 +11,9 @@ import java.net.Socket;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.PacketLineIn;
+import org.eclipse.jgit.transport.PacketLineOut;
 import org.eclipse.jgit.transport.ReceivePack;
+import org.eclipse.jgit.transport.SideBandOutputStream;
 import org.eclipse.jgit.transport.UploadPack;
 
 import freenet.keys.FreenetURI;
@@ -53,12 +55,26 @@ public class AnonymousGitService implements AbstractService {
 		String command = req[0].startsWith("git-") ? req[0] : "git-" + req[0];
 		String reposName = req[1];
 
+		// adjust uri string
 		if (reposName.startsWith("/")) {
 			reposName = reposName.substring(1);
 		}
 
 		if (!reposName.endsWith("/")) {
 			reposName = reposName + '/';
+		}
+
+		// reposname is the uri
+		FreenetURI iUri = null;
+		FreenetURI rUri = new FreenetURI(reposName);
+		if (!rUri.isUSK()) {
+			fatal(rawOut, "Repository uri must be an USK");
+			return;
+		}
+		if(rUri.getExtra()[1] == 1) {
+			iUri = rUri;
+			InsertableUSK iUsk = InsertableUSK.createInsertable(rUri, false);
+			rUri = iUsk.getURI();
 		}
 
 		//System.out.print("händle:"+command);
@@ -72,7 +88,14 @@ public class AnonymousGitService implements AbstractService {
 			rp.upload(rawIn, rawOut, null);
 		} else if ("git-receive-pack".equals(command)) {
 			// the client send us new objects
-			if (isReadOnly) return;
+			if (isReadOnly) {
+				fatal(rawOut, "Server is read only.");
+				return;
+			}
+			if (iUri == null) {
+				fatal(rawOut, "Try an insert uri for push.");
+				return;
+			}
 			Repository db = getRepository(reposName);
 			final ReceivePack rp = new ReceivePack(db);
 			final String name = "anonymous";
@@ -81,6 +104,7 @@ public class AnonymousGitService implements AbstractService {
 			//rp.setTimeout(Daemon.this.getTimeout());
 			rp.receive(rawIn, rawOut, null);
 		} else {
+			fatal(rawOut, "Unknown command: "+command);
 			System.err.println("Unknown command: "+command);
 		}
 
@@ -102,6 +126,14 @@ public class AnonymousGitService implements AbstractService {
 		File path = new File("gitcache", reposName + '@' + docName).getCanonicalFile();
 		db = new Repository(path);
 		return db;
+	}
+
+	private void fatal(OutputStream rawOut, String string) throws IOException {
+		PacketLineOut pckOut = new PacketLineOut(rawOut);
+		byte[] data = string.getBytes();
+		pckOut.writeChannelPacket(SideBandOutputStream.CH_ERROR, data, 0, data.length);
+		pckOut.flush();
+		rawOut.flush();
 	}
 
 }
