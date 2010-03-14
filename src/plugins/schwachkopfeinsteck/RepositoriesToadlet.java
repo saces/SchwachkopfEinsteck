@@ -403,7 +403,7 @@ public class RepositoriesToadlet extends WebInterfaceToadlet {
 		"Pull URI: U"+rUri.substring(1)+'/'+name+"/0/\n"+
 		"Push URI: (Keep it secret) U"+iUri.substring(1)+'/'+name+"/0/\n";
 
-		pluginContext.clientCore.alerts.register(new SimpleUserAlert(false, "Repository created", alert, "Repository created", UserAlert.MINOR));
+		pluginContext.clientCore.alerts.register(new SimpleUserAlert(true, "Repository created", alert, "Repository created", UserAlert.MINOR));
 
 		try {
 			updateDescription(reposDir, comment);
