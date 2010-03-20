@@ -13,7 +13,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.PacketLineIn;
 import org.eclipse.jgit.transport.PacketLineOut;
 import org.eclipse.jgit.transport.ReceivePack;
-import org.eclipse.jgit.transport.SideBandOutputStream;
 import org.eclipse.jgit.transport.UploadPack;
 
 import freenet.keys.FreenetURI;
