@@ -206,11 +206,11 @@ public class RepositoriesToadlet extends WebInterfaceToadlet {
 		box.addChild("#", "Created a new repository. Congratz!");
 		box.addChild("br");
 		box.addChild("#", "Pull URI, give it away if you want:\u00a0 ");
-		box.addChild("code", "git://127.0.0.1:9481/U"+rUri.substring(1)+'/'+name+"/0/");
+		box.addChild("code", "git://127.0.0.1:9418/U"+rUri.substring(1)+'/'+name+"/0/");
 		box.addChild("br");
 		box.addChild("br");
 		box.addChild("#", "Push URI, Keep it secret! Never give away or share!:\u00a0 ");
-		box.addChild("code", "git://127.0.0.1:9481/U"+iUri.substring(1)+'/'+name+"/0/");
+		box.addChild("code", "git://127.0.0.1:9418/U"+iUri.substring(1)+'/'+name+"/0/");
 		box.addChild("br");
 	}
 
