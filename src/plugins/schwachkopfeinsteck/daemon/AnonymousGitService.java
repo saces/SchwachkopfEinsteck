@@ -15,10 +15,15 @@ import org.eclipse.jgit.transport.PacketLineOut;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.UploadPack;
 
+import plugins.schwachkopfeinsteck.ReposInserter1;
+
+import freenet.client.InsertException;
 import freenet.keys.FreenetURI;
 import freenet.keys.InsertableUSK;
+import freenet.support.Executor;
 import freenet.support.Logger;
 import freenet.support.incubation.server.AbstractService;
+import freenet.support.plugins.helpers1.PluginContext;
 
 public class AnonymousGitService implements AbstractService {
 
@@ -30,9 +35,13 @@ public class AnonymousGitService implements AbstractService {
 	}
 
 	private final boolean isReadOnly;
+	private final Executor eXecutor;
+	private final PluginContext pluginContext;
 
-	public AnonymousGitService(boolean readOnly) {
+	public AnonymousGitService(boolean readOnly, Executor executor, PluginContext plugincontext) {
 		isReadOnly = readOnly;
+		eXecutor = executor;
+		pluginContext = plugincontext;
 	}
 
 	public void handle(Socket sock) throws IOException {
@@ -102,6 +111,32 @@ public class AnonymousGitService implements AbstractService {
 			rp.setRefLogIdent(new PersonIdent(name, email));
 			//rp.setTimeout(Daemon.this.getTimeout());
 			rp.receive(rawIn, rawOut, null);
+
+			final FreenetURI insertURI = iUri;
+			final File reposDir = getRepositoryPath(reposName);
+
+			// FIXME
+			Process p = Runtime.getRuntime().exec("git update-server-info --force", null, reposDir);
+			try {
+				p.waitFor();
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				// BAH, do not insert
+				return;
+			}
+
+			// FIXME
+			// trigger the upload, the quick&dirty way
+			eXecutor.execute(new Runnable (){
+				public void run() {
+					try {
+						ReposInserter1.insert(reposDir, insertURI, pluginContext);
+					} catch (InsertException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}});
 		} else {
 			fatal(rawOut, "Unknown command: "+command);
 			System.err.println("Unknown command: "+command);
@@ -111,7 +146,7 @@ public class AnonymousGitService implements AbstractService {
 
 	}
 
-	private Repository getRepository(String reposname) throws IOException {
+	private File getRepositoryPath(String reposname) throws IOException {
 		FreenetURI uri = new FreenetURI(reposname);
 		if(uri.getExtra()[1] == 1) {
 			InsertableUSK iUsk = InsertableUSK.createInsertable(uri, false);
@@ -121,8 +156,12 @@ public class AnonymousGitService implements AbstractService {
 		String docName = uri.getDocName();
 		uri = uri.setKeyType("SSK");
 		String reposName = uri.setDocName(null).setMetaString(null).toString(false, false);
+		return new File("gitcache", reposName + '@' + docName).getCanonicalFile();
+	}
+
+	private Repository getRepository(String reposname) throws IOException {
 		Repository db;
-		File path = new File("gitcache", reposName + '@' + docName).getCanonicalFile();
+		File path = getRepositoryPath(reposname);
 		db = new Repository(path);
 		return db;
 	}

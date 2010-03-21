@@ -36,7 +36,7 @@ public class GitPlugin implements FredPlugin, FredPluginL10n, FredPluginThreadle
 
 			// for now a single server only, later versions can do multiple servers
 			// and each can have its own cache/config
-			simpleDaemon = new AnonymousGitDaemon("huhu", pluginContext.node.executor);
+			simpleDaemon = new AnonymousGitDaemon("huhu", pluginContext.node.executor, pluginContext);
 			simpleDaemon.setCacheDir("./gitcache");
 
 			webInterface = new WebInterface(pluginContext);
