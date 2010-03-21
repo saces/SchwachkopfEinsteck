@@ -3,6 +3,9 @@ SchwachkopfEinsteck
 
 'SchwachkopfEinsteck' is german, it just translates to 'GitPlugin' :)
 
+Until 'update-server-info' is implemented (see TODO at buttom), the plugin
+requires to have the native git in path for proper operation. Sorry, folks.
+
 Prebuilt version: http://github.com/saces/SchwachkopfEinsteck/downloads
   Just load the latest, it should go intuitive…
 
@@ -35,6 +38,24 @@ configuration:
 
 Using It:
 
+  GO! GO! GO!
+  go to http://127.0.0.1:8889/GitPlugin/repos (Menu->Git Tools->Repositories)
+    create a new repository.
+    copy the inserturi from sucess page
+      git remote add <pasteithere> myFreenetRepos
+        or
+      git remote add git://127.0.0.1:9418/USK@inserturi,ABC/name/0/ myFreenetRepos
+    now push to it
+      git push myFreenetRepos master
+        or
+      git push git://127.0.0.1:9418/USK@inserturi,ABC/name/0/
+
+    fetch is work in progress, so you have to pull/fetch via fproxy for now
+      git clone http://127.0.0.1:8888/USK@requesturi,ADC/name/0/
+      git pull http://127.0.0.1:8888/USK@requesturi,ADC/name/0/
+
+--obsolete--
+
   Qualifying: (testing local repository creation, anonymous git transport)
     go to http://127.0.0.1:8889/GitPlugin/repos (Menu->Git Tools->Repositories)
     if any repository is left from warmup round, delete it
@@ -44,8 +65,6 @@ Using It:
       git pull git://127.0.0.1:9418/USK@crypticbitpuree,ADC/name/0/
 
   happy qualifying ;)
-
---obsolete--
 
   Warmup round: (testing the anonymous git transport)
     create a bare repository in gitcache/test
@@ -63,3 +82,16 @@ Using It:
     git pull git://127.0.0.1:9418/ignoredreposname
 
   happy warm up testing ;)
+
+
+TODO & Issues
+=============
+
+* local repository caching and locking
+
+* implement synchronization from freenet to local cache (pull/fetch)
+
+* implement 'update-server-info' (resolve requirement for native git)
+
+* figure out what 'submodule' needs server side, implement what needed
+
