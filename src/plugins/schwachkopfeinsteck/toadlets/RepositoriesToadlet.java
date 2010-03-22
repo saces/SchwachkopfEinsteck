@@ -124,6 +124,7 @@ public class RepositoriesToadlet extends WebInterfaceToadlet {
 					return;
 				}
 				makeCreatedReposPage(ctx, name, rUri, iUri, errors);
+				return;
 			}
 		} else {
 			errors.add("Did not understand. Maybe not implemented jet? :P");
