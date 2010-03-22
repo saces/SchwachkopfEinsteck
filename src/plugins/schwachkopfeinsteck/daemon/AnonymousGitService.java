@@ -104,7 +104,7 @@ public class AnonymousGitService implements AbstractService {
 				fatal(rawOut, "Try an insert uri for push.");
 				return;
 			}
-			Repository db = getRepository(reposName);
+			final Repository db = getRepository(reposName);
 			final ReceivePack rp = new ReceivePack(db);
 			final String name = "anonymous";
 			final String email = name + "@freenet";
@@ -116,22 +116,11 @@ public class AnonymousGitService implements AbstractService {
 			final File reposDir = getRepositoryPath(reposName);
 
 			// FIXME
-			Process p = Runtime.getRuntime().exec("git update-server-info --force", null, reposDir);
-			try {
-				p.waitFor();
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				// BAH, do not insert
-				return;
-			}
-
-			// FIXME
 			// trigger the upload, the quick&dirty way
 			eXecutor.execute(new Runnable (){
 				public void run() {
 					try {
-						ReposInserter1.insert(reposDir, insertURI, pluginContext);
+						ReposInserter1.insert(db, reposDir, insertURI, pluginContext);
 					} catch (InsertException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
