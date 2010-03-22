@@ -88,5 +88,3 @@ TODO & Issues
 
 * implement synchronization from freenet to local cache (pull/fetch)
 
-* figure out what 'submodule' needs server side, implement what needed
-
