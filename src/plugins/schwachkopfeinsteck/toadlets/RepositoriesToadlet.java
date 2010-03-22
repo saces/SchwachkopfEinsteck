@@ -1,4 +1,4 @@
-package plugins.schwachkopfeinsteck;
+package plugins.schwachkopfeinsteck.toadlets;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.eclipse.jgit.lib.Repository;
 
+import plugins.schwachkopfeinsteck.GitPlugin;
 import plugins.schwachkopfeinsteck.daemon.AnonymousGitDaemon;
 import freenet.clients.http.PageNode;
 import freenet.clients.http.ToadletContext;

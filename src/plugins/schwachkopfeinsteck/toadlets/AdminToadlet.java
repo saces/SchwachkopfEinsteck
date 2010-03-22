@@ -1,10 +1,11 @@
-package plugins.schwachkopfeinsteck;
+package plugins.schwachkopfeinsteck.toadlets;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 
+import plugins.schwachkopfeinsteck.GitPlugin;
 import plugins.schwachkopfeinsteck.daemon.AnonymousGitDaemon;
 
 import freenet.clients.http.PageNode;

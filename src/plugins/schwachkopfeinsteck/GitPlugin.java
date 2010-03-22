@@ -1,6 +1,9 @@
 package plugins.schwachkopfeinsteck;
 
 import plugins.schwachkopfeinsteck.daemon.AnonymousGitDaemon;
+import plugins.schwachkopfeinsteck.toadlets.AdminToadlet;
+import plugins.schwachkopfeinsteck.toadlets.BrowseToadlet;
+import plugins.schwachkopfeinsteck.toadlets.RepositoriesToadlet;
 
 import freenet.l10n.BaseL10n.LANGUAGE;
 import freenet.pluginmanager.FredPlugin;
