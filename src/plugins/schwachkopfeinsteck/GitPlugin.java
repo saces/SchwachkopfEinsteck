@@ -1,5 +1,8 @@
 package plugins.schwachkopfeinsteck;
 
+import java.io.File;
+import java.io.IOException;
+
 import plugins.schwachkopfeinsteck.daemon.AnonymousGitDaemon;
 import plugins.schwachkopfeinsteck.toadlets.AdminToadlet;
 import plugins.schwachkopfeinsteck.toadlets.BrowseToadlet;
@@ -33,14 +36,23 @@ public class GitPlugin implements FredPlugin, FredPluginL10n, FredPluginThreadle
 		private WebInterface webInterface;
 
 		private AnonymousGitDaemon simpleDaemon;
+		private RepositoryManager repositoryManager;
 
 		public void runPlugin(PluginRespirator pluginRespirator) {
 			pluginContext = new PluginContext(pluginRespirator);
 
+			final File cacheDir;
+			try {
+				cacheDir = RepositoryManager.ensureCacheDirExists("./gitcache");
+			} catch (IOException e) {
+				// It makes really no sense without cache, blow away.
+				throw new Error(e);
+			}
+	
+			repositoryManager = new RepositoryManager(cacheDir);
 			// for now a single server only, later versions can do multiple servers
 			// and each can have its own cache/config
-			simpleDaemon = new AnonymousGitDaemon("huhu", pluginContext.node.executor, pluginContext);
-			simpleDaemon.setCacheDir("./gitcache");
+			simpleDaemon = new AnonymousGitDaemon("huhu", repositoryManager, pluginContext);
 
 			webInterface = new WebInterface(pluginContext);
 			webInterface.addNavigationCategory(PLUGIN_URI+"/", PLUGIN_CATEGORY, "Git Toolbox", this);
@@ -48,17 +60,20 @@ public class GitPlugin implements FredPlugin, FredPluginL10n, FredPluginThreadle
 			// Visible pages
 			BrowseToadlet browseToadlet = new BrowseToadlet(pluginContext, simpleDaemon);
 			webInterface.registerVisible(browseToadlet, PLUGIN_CATEGORY, "Browse", "Browse a git repository like GitWeb");
-			AdminToadlet adminToadlet = new AdminToadlet(pluginContext, simpleDaemon);
+			AdminToadlet adminToadlet = new AdminToadlet(pluginContext, simpleDaemon, repositoryManager);
 			webInterface.registerVisible(adminToadlet, PLUGIN_CATEGORY, "Admin", "Admin the git server");
-			RepositoriesToadlet reposToadlet = new RepositoriesToadlet(pluginContext, simpleDaemon);
+			RepositoriesToadlet reposToadlet = new RepositoriesToadlet(pluginContext, simpleDaemon, repositoryManager);
 			webInterface.registerVisible(reposToadlet, PLUGIN_CATEGORY, "Repositories", "Create & Delete server's repositories");
 		}
 
 		public void terminate() {
-			webInterface.kill();
 			if (simpleDaemon.isRunning())
 				simpleDaemon.stop();
 			simpleDaemon = null;
+			webInterface.kill();
+			webInterface = null;
+			repositoryManager.kill();
+			repositoryManager = null;
 		}
 
 		public String getString(String key) {

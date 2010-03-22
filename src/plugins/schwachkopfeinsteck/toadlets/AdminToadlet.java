@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import plugins.schwachkopfeinsteck.GitPlugin;
+import plugins.schwachkopfeinsteck.RepositoryManager;
 import plugins.schwachkopfeinsteck.daemon.AnonymousGitDaemon;
 
 import freenet.clients.http.PageNode;
@@ -30,10 +31,12 @@ public class AdminToadlet extends WebInterfaceToadlet {
 	private static final String CMD_APPLY = "apply";
 
 	private final AnonymousGitDaemon daemon;
+	private final RepositoryManager repositoryManager;
 
-	public AdminToadlet(PluginContext context, AnonymousGitDaemon simpleDaemon) {
+	public AdminToadlet(PluginContext context, AnonymousGitDaemon simpleDaemon, RepositoryManager repositorymanager) {
 		super(context, GitPlugin.PLUGIN_URI, "admin");
 		daemon = simpleDaemon;
+		repositoryManager = repositorymanager;
 	}
 
 	public void handleMethodGET(URI uri, HTTPRequest req, ToadletContext ctx) throws ToadletContextClosedException, IOException {
@@ -108,7 +111,7 @@ public class AdminToadlet extends WebInterfaceToadlet {
 		boxForm.addChild("#", "GitPlugin uses a local cache to serve from. Congratulation, you have found the reference point for 'backup'.");
 		boxForm.addChild("br");
 		boxForm.addChild("#", "Cache dir: \u00a0 ");
-		boxForm.addChild("input", new String[] { "type", "name", "size", "value", "disabled"}, new String[] { "text", PARAM_CACHEDIR, "50", daemon.getCacheDir(), "disabled" });
+		boxForm.addChild("input", new String[] { "type", "name", "size", "value", "disabled"}, new String[] { "text", PARAM_CACHEDIR, "50", repositoryManager.getCacheDir(), "disabled" });
 		boxForm.addChild("br");
 		boxForm.addChild("input", new String[] { "type", "name", "value", "disabled" }, new String[] { "submit", CMD_APPLY, "Apply", "disabled" });
 	}

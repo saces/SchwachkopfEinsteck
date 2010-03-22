@@ -13,6 +13,7 @@ import java.util.List;
 import org.eclipse.jgit.lib.Repository;
 
 import plugins.schwachkopfeinsteck.GitPlugin;
+import plugins.schwachkopfeinsteck.RepositoryManager;
 import plugins.schwachkopfeinsteck.daemon.AnonymousGitDaemon;
 import freenet.clients.http.PageNode;
 import freenet.clients.http.ToadletContext;
@@ -46,15 +47,17 @@ public class RepositoriesToadlet extends WebInterfaceToadlet {
 
 	private static final String URI_WIDTH = "130";
 	private final AnonymousGitDaemon daemon;
+	private final RepositoryManager repositoryManager;
 
 	// '/', ';', '?' are forbidden to not confuse the URL parser,
 	// all others are forbidden to prevent file system clashes
 	private static final HashSet<Character> forbiddenChars = new HashSet<Character>(Arrays.asList(
 			new Character[] { '/', '\\', '?', '*', ':', ';', '|', '\"', '<', '>'}));
 
-	public RepositoriesToadlet(PluginContext context, AnonymousGitDaemon simpleDaemon) {
+	public RepositoriesToadlet(PluginContext context, AnonymousGitDaemon simpleDaemon, RepositoryManager repositorymanager) {
 		super(context, GitPlugin.PLUGIN_URI, "repos");
 		daemon = simpleDaemon;
+		repositoryManager = repositorymanager;
 	}
 
 	public void handleMethodGET(URI uri, HTTPRequest req, ToadletContext ctx) throws ToadletContextClosedException, IOException {
@@ -81,7 +84,7 @@ public class RepositoriesToadlet extends WebInterfaceToadlet {
 			String repos = request.getPartAsString(PARAM_REPOSNAME, 1024);
 			String desc = request.getPartAsString(PARAM_DESCRIPTION, 4096);
 			try {
-				updateDescription(repos, desc);
+				repositoryManager.updateDescription(repos, desc);
 			} catch (IOException e) {
 				e.printStackTrace();
 				errors.add("Error while updating description : "+e.getLocalizedMessage());
@@ -89,7 +92,7 @@ public class RepositoriesToadlet extends WebInterfaceToadlet {
 		} else if (request.isPartSet(CMD_DELETE)) {
 			String repos = request.getPartAsString(PARAM_REPOSNAME, 1024);
 			if (request.isPartSet(PARAM_DELETECONFIRM)) {
-				deleteRepository(repos);
+				repositoryManager.deleteRepository(repos);
 			} else {
 				makeDeleteConfirmPage(ctx, repos);
 				return;
@@ -275,7 +278,7 @@ public class RepositoriesToadlet extends WebInterfaceToadlet {
 	private void makeRepositoryBox(HTMLNode parent) {
 		HTMLNode box = pluginContext.pageMaker.getInfobox("infobox-information", "Repositories", parent);
 
-		File cacheDir = daemon.getCacheDirFile();
+		File cacheDir = repositoryManager.getCacheDirFile();
 		File[] dirs = cacheDir.listFiles();
 		if (dirs.length == 0) {
 			box.addChild("#", "No repositories set up.");
@@ -359,25 +362,6 @@ public class RepositoriesToadlet extends WebInterfaceToadlet {
 		return desc;
 	}
 
-	private void updateDescription(String repos, String desc) throws IOException {
-		File reposFile = new File(daemon.getCacheDirFile(), repos);
-		updateDescription(reposFile, desc);
-	}
-
-	private void updateDescription(File repos, String desc) throws IOException {
-		File descfile = new File(repos, "description");
-		if (descfile.exists()) {
-			descfile.delete();
-		}
-		InputStream is = new ByteArrayInputStream(desc.getBytes("UTF-8"));
-		FileUtil.writeTo(is, descfile);
-	}
-
-	private void deleteRepository(String reposName) {
-		File repos = new File(daemon.getCacheDirFile(), reposName);
-		FileUtil.removeAll(repos);
-	}
-
 	private String getReposURI(File repos) {
 		return repos.getName();
 	}
@@ -388,17 +372,13 @@ public class RepositoriesToadlet extends WebInterfaceToadlet {
 
 	private void tryCreateRepository(String name, String rUri, String iUri, List<String> errors) {
 		String dirName = rUri + '@' + name;
-		File reposDir = new File(daemon.getCacheDirFile(), dirName);
-		Repository repos;
 		try {
-			repos = new Repository(reposDir);
-			repos.create(true);
+			repositoryManager.tryCreateRepository(dirName, "add a description here");
 		} catch (IOException e) {
-			Logger.error(this, "Error while create repository: "+reposDir.getAbsolutePath(), e);
+			Logger.error(this, "Error while create repository: "+dirName, e);
 			errors.add(e.getLocalizedMessage());
 			return;
 		}
-		String comment = "add a description here";
 
 		String alert = "Due lack of a better idea the URIs are noted here:\n"+
 		"Created Repository :"+dirName+"\n"+
@@ -406,13 +386,6 @@ public class RepositoriesToadlet extends WebInterfaceToadlet {
 		"Push URI: (Keep it secret) U"+iUri.substring(1)+'/'+name+"/0/\n";
 
 		pluginContext.clientCore.alerts.register(new SimpleUserAlert(true, "Repository created", alert, "Repository created", UserAlert.MINOR));
-
-		try {
-			updateDescription(reposDir, comment);
-		} catch (IOException e) {
-			Logger.error(this, "Error while updating repository description for: "+reposDir.getAbsolutePath(), e);
-			errors.add(e.getLocalizedMessage());
-		}
 	}
 
 	private String sanitizeDocName(String docName, List<String> errors) {
