@@ -3,9 +3,6 @@ SchwachkopfEinsteck
 
 'SchwachkopfEinsteck' is german, it just translates to 'GitPlugin' :)
 
-Until 'update-server-info' is implemented (see TODO at buttom), the plugin
-requires to have the native git in path for proper operation. Sorry, folks.
-
 Prebuilt version: http://github.com/saces/SchwachkopfEinsteck/downloads
   Just load the latest, it should go intuitive…
 
@@ -90,8 +87,6 @@ TODO & Issues
 * local repository caching and locking
 
 * implement synchronization from freenet to local cache (pull/fetch)
-
-* implement 'update-server-info' (resolve requirement for native git)
 
 * figure out what 'submodule' needs server side, implement what needed
 
