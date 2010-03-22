@@ -36,7 +36,7 @@ configuration:
 Using It:
 
   GO! GO! GO!
-  go to http://127.0.0.1:8889/GitPlugin/repos (Menu->Git Tools->Repositories)
+  go to http://127.0.0.1:8888/GitPlugin/repos (Menu->Git Tools->Repositories)
     create a new repository.
     copy the inserturi from sucess page
       git remote add <pasteithere> myFreenetRepos
@@ -54,7 +54,7 @@ Using It:
 --obsolete--
 
   Qualifying: (testing local repository creation, anonymous git transport)
-    go to http://127.0.0.1:8889/GitPlugin/repos (Menu->Git Tools->Repositories)
+    go to http://127.0.0.1:8888/GitPlugin/repos (Menu->Git Tools->Repositories)
     if any repository is left from warmup round, delete it
     create a new repository.
     for now the URIs are noted in the repository description.
