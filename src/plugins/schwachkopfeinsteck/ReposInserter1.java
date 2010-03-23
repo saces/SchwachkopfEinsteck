@@ -34,19 +34,20 @@ import freenet.support.io.TempBucketFactory;
 public class ReposInserter1 extends BaseManifestPutter {
 
 	public ReposInserter1(ClientPutCallback cb,
-			File reposDir, Repository db, short prioClass,
+			HashMap<String, FreenetURI> packList, File reposDir, Repository db, short prioClass,
 			FreenetURI target, String defaultName, InsertContext ctx,
 			boolean getCHKOnly2, RequestClient clientContext,
 			boolean earlyEncode, TempBucketFactory tempBucketFactory) {
-		super(cb, paramTrick(reposDir, db, tempBucketFactory), prioClass, target, defaultName, ctx, getCHKOnly2,
+		super(cb, paramTrick(packList, reposDir, db, tempBucketFactory), prioClass, target, defaultName, ctx, getCHKOnly2,
 				clientContext, earlyEncode);
 	}
 
-	private static HashMap<String, Object> paramTrick(File reposDir, Repository db, TempBucketFactory tbf) {
+	private static HashMap<String, Object> paramTrick(HashMap<String, FreenetURI> packList, File reposDir, Repository db, TempBucketFactory tbf) {
 		HashMap<String, Object> result = new HashMap<String, Object>();
 		result.put("rDir", reposDir);
 		result.put("tbf", tbf);
 		result.put("db", db);
+		result.put("packList", packList);
 		return result;
 	}
 
@@ -56,6 +57,7 @@ public class ReposInserter1 extends BaseManifestPutter {
 		File reposDir = (File) manifestElements.get("rDir");
 		TempBucketFactory tbf = (TempBucketFactory) manifestElements.get("tbf");
 		Repository db = (Repository) manifestElements.get("db");
+		HashMap<String, FreenetURI> packList = (HashMap<String, FreenetURI>) manifestElements.get("packList");
 
 		// make the default page
 		String defaultText = "This is a git repository.";
@@ -83,7 +85,7 @@ public class ReposInserter1 extends BaseManifestPutter {
 			container.addItem("packs", packsItem, false);
 			container.popCurrentDir();
 
-			parseDir(reposDir, container, tbf);
+			parseDir(reposDir, container, tbf, false, packList);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new Error(e);
@@ -140,14 +142,32 @@ public class ReposInserter1 extends BaseManifestPutter {
 		return result;
 	}
 
-	private void parseDir(File dir, ContainerBuilder container, TempBucketFactory tbf) throws IOException {
+	private void parseDir(File dir, ContainerBuilder container, TempBucketFactory tbf, boolean checkPack, HashMap<String, FreenetURI> packList) throws IOException {
 		File[] files = dir.listFiles();
 		for (File file : files) {
 			if (file.isDirectory()) {
 				container.pushCurrentDir();
 				container.makeSubDirCD(file.getName());
-				parseDir(file, container, tbf);
+				if (checkPack && file.getName().equals("pack")) {
+					parsePackList(file, packList, container, tbf);
+				} else {
+					parseDir(file, container, tbf, (file.getName().equals("objects")), packList);
+				}
 				container.popCurrentDir();
+			} else {
+				addFile(file, container, tbf);
+			}
+		}
+	}
+
+	private void parsePackList(File dir, HashMap<String, FreenetURI> packList, ContainerBuilder container, TempBucketFactory tbf) throws IOException {
+		File[] files = dir.listFiles();
+		for (File file : files) {
+			String name = file.getName();
+			if (packList.containsKey(name)) {
+				FreenetURI target = packList.get(name);
+				ManifestElement me = new ManifestElement(file.getName(), target, "text/plain");
+				container.addItem(file.getName(), me, false);
 			} else {
 				addFile(file, container, tbf);
 			}
