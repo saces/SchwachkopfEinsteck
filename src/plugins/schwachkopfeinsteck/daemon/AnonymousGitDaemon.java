@@ -1,7 +1,5 @@
 package plugins.schwachkopfeinsteck.daemon;
 
-import java.io.File;
-
 import plugins.schwachkopfeinsteck.RepositoryManager;
 
 import freenet.support.incubation.server.AbstractServer;
@@ -22,7 +20,7 @@ public class AnonymousGitDaemon extends AbstractServer {
 
 	@Override
 	protected AbstractService getService() {
-		return new AnonymousGitService(isReadOnly(), eXecutor, pluginContext);
+		return new AnonymousGitService(isReadOnly(), eXecutor, pluginContext, repositoryManager);
 	}
 
 	public void setReadOnly(boolean readOnly) {

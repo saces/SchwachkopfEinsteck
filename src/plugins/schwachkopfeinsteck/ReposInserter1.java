@@ -19,13 +19,9 @@ import org.eclipse.jgit.revwalk.RevFlag;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.RefAdvertiser;
 
-import com.db4o.ObjectContainer;
-
 import freenet.client.InsertContext;
-import freenet.client.InsertException;
 import freenet.client.async.BaseManifestPutter;
 import freenet.client.async.ClientPutCallback;
-import freenet.client.async.DatabaseDisabledException;
 import freenet.client.async.ManifestElement;
 import freenet.keys.FreenetURI;
 import freenet.node.RequestClient;
@@ -34,7 +30,6 @@ import freenet.support.io.ArrayBucket;
 import freenet.support.io.BucketTools;
 import freenet.support.io.Closer;
 import freenet.support.io.TempBucketFactory;
-import freenet.support.plugins.helpers1.PluginContext;
 
 public class ReposInserter1 extends BaseManifestPutter {
 
@@ -179,34 +174,4 @@ public class ReposInserter1 extends BaseManifestPutter {
 		b.setReadOnly();
 		return b;
 	}
-
-	public static FreenetURI insert(Repository db, File reposDir, FreenetURI insertURI, PluginContext pluginContext) throws InsertException {
-		RequestClient rc = new RequestClient() {
-			public boolean persistent() {
-				return false;
-			}
-			public void removeFrom(ObjectContainer container) {
-			}
-			
-		};
-		InsertContext iCtx = pluginContext.hlsc.getInsertContext(true);
-		iCtx.compressorDescriptor = "LZMA";
-		VerboseWaiter pw = new VerboseWaiter();
-		ReposInserter1 dmp = new ReposInserter1(pw, reposDir, db, (short) 1, insertURI.setMetaString(null), "index.html", iCtx, false, rc, false, pluginContext.clientCore.tempBucketFactory);
-		iCtx.eventProducer.addEventListener(pw);
-		try {
-			pluginContext.clientCore.clientContext.start(dmp);
-		} catch (DatabaseDisabledException e) {
-			// Impossible
-		}
-		FreenetURI result;
-		try {
-			result = pw.waitForCompletion();
-		} finally {
-			iCtx.eventProducer.removeEventListener(pw);
-		}
-		return result;
-	}
-	
-
 }

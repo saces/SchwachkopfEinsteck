@@ -47,7 +47,7 @@ Using It:
         or
       git push git://127.0.0.1:9418/USK@inserturi,ABC/name/0/
 
-    fetch is work in progress, so you have to pull/fetch via fproxy for now
+    fetch is work in progress, so you have to pull/fetch remote repositories via fproxy for now
       git clone http://127.0.0.1:8888/USK@requesturi,ADC/name/0/
       git pull http://127.0.0.1:8888/USK@requesturi,ADC/name/0/
 

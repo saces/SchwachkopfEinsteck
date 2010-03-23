@@ -1,16 +1,12 @@
 package plugins.schwachkopfeinsteck.toadlets;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.eclipse.jgit.lib.Repository;
 
 import plugins.schwachkopfeinsteck.GitPlugin;
 import plugins.schwachkopfeinsteck.RepositoryManager;

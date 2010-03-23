@@ -2,12 +2,13 @@ package plugins.schwachkopfeinsteck.daemon;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.Socket;
-
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.PacketLineIn;
@@ -15,7 +16,8 @@ import org.eclipse.jgit.transport.PacketLineOut;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.UploadPack;
 
-import plugins.schwachkopfeinsteck.ReposInserter1;
+import plugins.schwachkopfeinsteck.RepositoryManager;
+import plugins.schwachkopfeinsteck.RepositoryManager.RepositoryWrapper;
 
 import freenet.client.InsertException;
 import freenet.keys.FreenetURI;
@@ -37,11 +39,17 @@ public class AnonymousGitService implements AbstractService {
 	private final boolean isReadOnly;
 	private final Executor eXecutor;
 	private final PluginContext pluginContext;
+	private final RepositoryManager repositoryManager;
+	
+	private static final long LOCK_TIMEOUT = 5;
+	private static final TimeUnit LOCK_TIMEUNIT = TimeUnit.SECONDS;
+	
 
-	public AnonymousGitService(boolean readOnly, Executor executor, PluginContext plugincontext) {
+	public AnonymousGitService(boolean readOnly, Executor executor, PluginContext plugincontext, RepositoryManager repositorymanager) {
 		isReadOnly = readOnly;
 		eXecutor = executor;
 		pluginContext = plugincontext;
+		repositoryManager = repositorymanager;
 	}
 
 	public void handle(Socket sock) throws IOException {
@@ -72,28 +80,145 @@ public class AnonymousGitService implements AbstractService {
 			reposName = reposName + '/';
 		}
 
-		// reposname is the uri
+		// reposName is the uri
 		FreenetURI iUri = null;
-		FreenetURI rUri = new FreenetURI(reposName);
-		if (!rUri.isUSK()) {
-			fatal(rawOut, "Repository uri must be an USK");
+		FreenetURI rUri;
+		try {
+			rUri = new FreenetURI(reposName);
+		} catch (MalformedURLException e1) {
+			fatal(rawOut, "Not a valid Freenet URI: "+e1.getLocalizedMessage());
 			return;
 		}
+		if (!rUri.isUSK()) {
+			fatal(rawOut, "Repository uri must be an USK.");
+			return;
+		}
+		// if it is an insert uri, get the request uri from it.
 		if(rUri.getExtra()[1] == 1) {
 			iUri = rUri;
 			InsertableUSK iUsk = InsertableUSK.createInsertable(rUri, false);
 			rUri = iUsk.getURI();
 		}
 
-		//System.out.print("händle:"+command);
-		//System.out.println(" for:"+reposName);
+		// reposName is the internal repository name
+		reposName = RepositoryManager.getRepositoryName(rUri);
 
+		RepositoryWrapper rw = repositoryManager.getRepository(reposName);
+		if (rw == null) {
+			fatal(rawOut, "No such repository.");
+			return;
+		}
+
+		try {
+			innerHandle(command, rw, rawIn, rawOut, rUri, iUri);
+		} catch (InterruptedException e) {
+			Logger.error(this, "Interrupted.", e);
+			fatal(rawOut, "Interrupted.");
+		}
+	}
+
+	private class LockWorkerThread extends Thread {
+
+		private volatile boolean recivedDone = false;
+
+		private final RepositoryWrapper rW;
+		private final InputStream rawIn;
+		private final OutputStream rawOut;
+		
+		private String error = null;
+		private final FreenetURI fetchUri;
+		private final FreenetURI insertUri;
+
+		LockWorkerThread(RepositoryWrapper rw, InputStream rawin, OutputStream rawout, FreenetURI fetchuri, FreenetURI inserturi) {
+			rW = rw;
+			rawIn = rawin;
+			rawOut = rawout;
+			fetchUri = fetchuri;
+			insertUri = inserturi;
+		}
+
+		@Override
+		public void run() {
+			try {
+				innerRun();
+			} catch (InterruptedException e) {
+				Logger.error(this, "Interrupted.", e);
+			} catch (IOException e) {
+				Logger.error(this, "IO Error.", e);
+			}
+		}
+
+		private void innerRun() throws InterruptedException, IOException {
+			Lock lock = rW.rwLock.writeLock();
+			if (lock.tryLock() || lock.tryLock(LOCK_TIMEOUT, LOCK_TIMEUNIT)) {
+				boolean sucess = false;
+				boolean triggerUpload;
+				try {
+					triggerUpload = handleGitReceivePack(rW.db, rawIn, rawOut);
+					sucess = true;
+				} finally {
+					if (!sucess) {
+						lock.unlock();
+					}
+					recivedDone();
+				}
+
+				if (!triggerUpload) {
+					if (logMINOR) Logger.minor(this, "Nothing updated. Do not upload.");
+					lock.unlock();
+					return;
+				}
+
+				// downgrade from write to read lock
+				Lock newLock = rW.rwLock.readLock();
+				newLock.lock();
+				lock.unlock();
+				lock = newLock;
+
+				try {
+					repositoryManager.insert(rW, fetchUri, insertUri, pluginContext);
+				} catch (InsertException e) {
+					error = "Insert Failure: "+InsertException.getMessage(e.getMode());
+					Logger.error(this, error, e);
+				} finally {
+					lock.unlock();
+				}
+			} else {
+				error = "Was not able to obtain a write lock within 5 seconds.\nTry again later.";
+				recivedDone();
+			}
+		}
+
+		private synchronized void recivedDone() {
+			recivedDone = true;
+			notifyAll();
+		}
+
+		public synchronized void waitForReciveDone() {
+			while(!recivedDone) {
+				try {
+					wait();
+				} catch (InterruptedException e) {
+					// Ignore
+				}
+			}
+		}
+	}
+
+	private void innerHandle(String command, final RepositoryWrapper rw, InputStream rawIn, OutputStream rawOut, final FreenetURI rUri, final FreenetURI iUri) throws IOException, InterruptedException {
 		if ("git-upload-pack".equals(command)) {
 			// the client want to have missing objects
-			Repository db = getRepository(reposName);
-			final UploadPack rp = new UploadPack(db);
-			//rp.setTimeout(Daemon.this.getTimeout());
-			rp.upload(rawIn, rawOut, null);
+			Lock lock = rw.rwLock.readLock();
+			if (lock.tryLock() || lock.tryLock(LOCK_TIMEOUT, LOCK_TIMEUNIT)) {
+				try {
+					handleGitUploadPack(rw.db, rawIn, rawOut);
+				} finally {
+					lock.unlock();
+				}
+			} else {
+				fatal(rawOut, "Was not able to obtain a read lock within 5 seconds.\nTry again later.");
+				return;
+			}
 		} else if ("git-receive-pack".equals(command)) {
 			// the client send us new objects
 			if (isReadOnly) {
@@ -104,55 +229,40 @@ public class AnonymousGitService implements AbstractService {
 				fatal(rawOut, "Try an insert uri for push.");
 				return;
 			}
-			final Repository db = getRepository(reposName);
-			final ReceivePack rp = new ReceivePack(db);
-			final String name = "anonymous";
-			final String email = name + "@freenet";
-			rp.setRefLogIdent(new PersonIdent(name, email));
-			//rp.setTimeout(Daemon.this.getTimeout());
-			rp.receive(rawIn, rawOut, null);
 
-			final FreenetURI insertURI = iUri;
-			final File reposDir = getRepositoryPath(reposName);
+			LockWorkerThread t = new LockWorkerThread(rw, rawIn, rawOut, rUri, iUri);
+			eXecutor.execute(t);
 
-			// FIXME
-			// trigger the upload, the quick&dirty way
-			eXecutor.execute(new Runnable (){
-				public void run() {
-					try {
-						ReposInserter1.insert(db, reposDir, insertURI, pluginContext);
-					} catch (InsertException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}});
+			t.waitForReciveDone();
+
+			if (t.error != null) {
+				fatal(rawOut, t.error);
+			}
 		} else {
+			Logger.error(this, "Unknown command: "+command);
 			fatal(rawOut, "Unknown command: "+command);
-			System.err.println("Unknown command: "+command);
 		}
-
-		//System.out.println("x händle request: pfertsch");
-
 	}
 
-	private File getRepositoryPath(String reposname) throws IOException {
-		FreenetURI uri = new FreenetURI(reposname);
-		if(uri.getExtra()[1] == 1) {
-			InsertableUSK iUsk = InsertableUSK.createInsertable(uri, false);
-			uri = iUsk.getURI();
-		}
-
-		String docName = uri.getDocName();
-		uri = uri.setKeyType("SSK");
-		String reposName = uri.setDocName(null).setMetaString(null).toString(false, false);
-		return new File("gitcache", reposName + '@' + docName).getCanonicalFile();
+	private void handleGitUploadPack(Repository db, InputStream rawIn, OutputStream rawOut) throws IOException {
+		final UploadPack rp = new UploadPack(db);
+		//rp.setTimeout(Daemon.this.getTimeout());
+		rp.upload(rawIn, rawOut, null);
 	}
 
-	private Repository getRepository(String reposname) throws IOException {
-		Repository db;
-		File path = getRepositoryPath(reposname);
-		db = new Repository(path);
-		return db;
+	private boolean handleGitReceivePack(final Repository db, InputStream rawIn, OutputStream rawOut) throws IOException {
+		final ReceivePack rp = new ReceivePack(db);
+		final String name = "anonymous";
+		final String email = name + "@freenet";
+		rp.setRefLogIdent(new PersonIdent(name, email));
+		//rp.setTimeout(Daemon.this.getTimeout());
+		rp.receive(rawIn, rawOut, null);
+		try {
+			rp.getNewObjectIds();
+		} catch ( NullPointerException npe) {
+			return false;
+		}
+		return true;
 	}
 
 	private void fatal(OutputStream rawOut, String string) throws IOException {
