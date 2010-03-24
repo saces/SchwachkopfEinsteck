@@ -38,17 +38,15 @@ public class AnonymousGitService implements AbstractService {
 
 	private final boolean isReadOnly;
 	private final Executor eXecutor;
-	private final PluginContext pluginContext;
 	private final RepositoryManager repositoryManager;
 	
 	private static final long LOCK_TIMEOUT = 5;
 	private static final TimeUnit LOCK_TIMEUNIT = TimeUnit.SECONDS;
 	
 
-	public AnonymousGitService(boolean readOnly, Executor executor, PluginContext plugincontext, RepositoryManager repositorymanager) {
+	public AnonymousGitService(boolean readOnly, Executor executor, RepositoryManager repositorymanager) {
 		isReadOnly = readOnly;
 		eXecutor = executor;
-		pluginContext = plugincontext;
 		repositoryManager = repositorymanager;
 	}
 
@@ -176,7 +174,7 @@ public class AnonymousGitService implements AbstractService {
 				lock = newLock;
 
 				try {
-					repositoryManager.insert(rW, fetchUri, insertUri, pluginContext);
+					repositoryManager.insert(rW, fetchUri, insertUri);
 				} catch (InsertException e) {
 					error = "Insert Failure: "+InsertException.getMessage(e.getMode());
 					Logger.error(this, error, e);

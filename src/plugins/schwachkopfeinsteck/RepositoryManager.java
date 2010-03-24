@@ -209,7 +209,7 @@ public class RepositoryManager {
 		// empty caches.
 	}
 
-	public FreenetURI insert(RepositoryWrapper rw, FreenetURI fetchURI, FreenetURI insertURI, PluginContext pluginContext) throws InsertException {
+	public FreenetURI insert(RepositoryWrapper rw, FreenetURI fetchURI, FreenetURI insertURI) throws InsertException {
 		File reposDir = new File(cacheDir, rw.name);
 
 		//get the edition hint
