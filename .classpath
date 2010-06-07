@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="lib/jgit/org.eclipse.jgit/src"/>
-	<classpathentry kind="src" path="lib/jsch/src"/>
-	<classpathentry kind="src" path="lib/jzlib"/>
-	<classpathentry kind="src" path="lib/ernie/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/fred"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/orbit"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jgit"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
