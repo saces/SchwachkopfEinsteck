@@ -25,7 +25,6 @@ import freenet.keys.InsertableUSK;
 import freenet.support.Executor;
 import freenet.support.Logger;
 import freenet.support.incubation.server.AbstractService;
-import freenet.support.plugins.helpers1.PluginContext;
 
 public class AnonymousGitService implements AbstractService {
 
@@ -255,11 +254,12 @@ public class AnonymousGitService implements AbstractService {
 		rp.setRefLogIdent(new PersonIdent(name, email));
 		//rp.setTimeout(Daemon.this.getTimeout());
 		rp.receive(rawIn, rawOut, null);
-		try {
-			rp.getNewObjectIds();
-		} catch ( NullPointerException npe) {
-			return false;
-		}
+		// FIXME did something change?
+//		try {
+//			rp.getNewObjectIds();
+//		} catch ( NullPointerException npe) {
+//			return false;
+//		}
 		return true;
 	}
 

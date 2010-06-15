@@ -67,50 +67,6 @@
 		</javac>
 
 		<!-- FIXME: remove the debug and replace with optimize -->
-		<javac srcdir="lib/jzlib" destdir="${build}" debug="on" optimize="on" source="${source-version}" target="${target-version}">
-			<classpath>
-				<pathelement location="${freenet-ext.location}"/>
-				<pathelement location="${freenet-cvs-snapshot.location}"/>
-			</classpath>
-			<include name="**/*.java"/>
-			<exclude name="**/*Test.java"/>
-			<exclude name="${version.src}"/>
-		</javac>
-
-		<!-- FIXME: remove the debug and replace with optimize -->
-		<javac srcdir="lib/jsch/src" destdir="${build}" debug="on" optimize="on" source="${source-version}" target="${target-version}">
-			<classpath>
-				<pathelement location="${freenet-ext.location}"/>
-				<pathelement location="${freenet-cvs-snapshot.location}"/>
-			</classpath>
-			<include name="**/*.java"/>
-			<exclude name="**/*Test.java"/>
-			<exclude name="${version.src}"/>
-		</javac>
-
-		<!-- FIXME: remove the debug and replace with optimize -->
-		<javac srcdir="lib/jgit/org.eclipse.jgit/src" destdir="${build}" debug="on" optimize="on" source="${source-version}" target="${target-version}">
-			<classpath>
-				<pathelement location="${freenet-ext.location}"/>
-				<pathelement location="${freenet-cvs-snapshot.location}"/>
-			</classpath>
-			<include name="**/*.java"/>
-			<exclude name="**/*Test.java"/>
-			<exclude name="${version.src}"/>
-		</javac>
-
-		<!-- FIXME: remove the debug and replace with optimize -->
-		<javac srcdir="lib/ernie/src" destdir="${build}" debug="on" optimize="on" source="${source-version}" target="${target-version}">
-			<classpath>
-				<pathelement location="${freenet-ext.location}"/>
-				<pathelement location="${freenet-cvs-snapshot.location}"/>
-			</classpath>
-			<include name="**/*.java"/>
-			<exclude name="**/*Test.java"/>
-			<exclude name="${version.src}"/>
-		</javac>
-
-		<!-- FIXME: remove the debug and replace with optimize -->
 		<javac srcdir="${src}" destdir="${build}" debug="on" optimize="on" source="${source-version}" target="${target-version}">
 			<classpath>
 				<pathelement location="${freenet-ext.location}"/>
@@ -161,11 +117,33 @@
 	</target>
 
 	<!-- ================================================== -->
-	<target name="dist" depends="compile,junit"
+	<target name="dist" depends="compile"
 		description="generate the distribution" >
 		<jar jarfile="${dist}/SchwachkopfEinsteck.jar" duplicate="fail">
 			<manifest>
 				<attribute name="Plugin-Main-Class" value="plugins.schwachkopfeinsteck.GitPlugin"/>
+				<attribute name="Bundle-ManifestVersion" value="2" />
+				<attribute name="Bundle-Activator" value="ske.Activator" />
+				<attribute name="Bundle-Name" value="SchwachkopfEinsteck" />
+				<attribute name="Bundle-SymbolicName" value="org.foo.example.Example" />
+				<attribute name="Bundle-Version" value="0.0.1" />
+				<attribute name="Import-Package" value="org.osgi.framework;version=1.3.0,
+org.eclipse.jgit.errors,
+					org.eclipse.jgit.lib,
+					org.eclipse.jgit.revwalk,
+					org.eclipse.jgit.transport,
+org.eclipse.jgit.http.server,
+org.eclipse.jgit.http.server.resolver,
+org.osgi.service.http,
+freenet.node,
+freenet.keys,
+freenet.client,
+freenet.client.async,
+freenet.client.events,
+freenet.support,
+freenet.support.api,
+freenet.support.io" />
+				<!-- attribute name="Export-Package" value="hyperocha.api" / -->
 			</manifest>
 			<fileset dir="src/" casesensitive="no">
 				<include name="*.txt"/>

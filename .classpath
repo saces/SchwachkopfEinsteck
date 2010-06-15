@@ -5,5 +5,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/fred"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/orbit"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jgit"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/concierge-framework"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/concierge-http"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
