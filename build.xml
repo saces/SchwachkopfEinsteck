@@ -2,8 +2,12 @@
 <!-- ant build file for SchwachkopfEinsteck -->
 
 <project name="SchwachkopfEinsteck" default="dist" basedir=".">
-	<property name="freenet-cvs-snapshot.location" location="../fred/lib/freenet-cvs-snapshot.jar"/>
-	<property name="freenet-ext.location" location="../fred/lib/freenet-ext.jar"/>
+
+	<property name="fred.jar.location" location="../fred/lib/FreenetService.jar"/>
+	<property name="framework.jar.location" location="../concierge/framework/dist/fconcierge.jar"/>
+	<property name="servletapi.jar.location" location="../concierge/bundles/http/dist/concierge-http.jar"/>
+	<property name="jgit.jar.location" location="../jgit/dist/jgit.jar"/>
+
 	<property name="svn.revision" value="@custom@"/>
 	<property name="source-version" value="1.5"/>
 	<property name="target-version" value="1.5"/>
@@ -39,8 +43,6 @@
 		<mkdir dir="${build}"/>
 		<mkdir dir="${build-test}"/>
 		<mkdir dir="${dist}"/>
-		<echo message="Using ${freenet-cvs-snapshot.location} as freenet-cvs-snapshot.jar"/>
-		<echo message="Using ${freenet-ext.location} as freenet-ext.jar"/>
 	</target>
 
 	<!-- ================================================== -->
@@ -59,19 +61,16 @@
 
 		<!-- Force compile of Version.java in case compile of ${src} didn't trigger it -->
 		<javac srcdir="${build}" destdir="${build}" debug="on" optimize="on" source="${source-version}" target="${target-version}">
-			<classpath>
-				<pathelement location="${freenet-ext.location}"/>
-				<pathelement location="${freenet-cvs-snapshot.location}"/>
-			</classpath>
 			<include name="${version.src}"/>
 		</javac>
 
 		<!-- FIXME: remove the debug and replace with optimize -->
 		<javac srcdir="${src}" destdir="${build}" debug="on" optimize="on" source="${source-version}" target="${target-version}">
 			<classpath>
-				<pathelement location="${freenet-ext.location}"/>
-				<pathelement location="${freenet-cvs-snapshot.location}"/>
-				<pathelement location="lib/jgit/org.eclipse.jgit/src"/>
+				<pathelement location="${fred.jar.location}"/>
+				<pathelement location="${servletapi.jar.location}"/>
+				<pathelement location="${jgit.jar.location}"/>
+				<pathelement location="${framework.jar.location}"/>
 			</classpath>
 			<include name="**/*.java"/>
 			<exclude name="**/*Test.java"/>
