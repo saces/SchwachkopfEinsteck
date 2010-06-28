@@ -127,6 +127,7 @@
 				<attribute name="Bundle-SymbolicName" value="org.foo.example.Example" />
 				<attribute name="Bundle-Version" value="0.0.1" />
 				<attribute name="Import-Package" value="org.osgi.framework;version=1.3.0,
+javax.servlet,
 org.eclipse.jgit.errors,
 					org.eclipse.jgit.lib,
 					org.eclipse.jgit.revwalk,
