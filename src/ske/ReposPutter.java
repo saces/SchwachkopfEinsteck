@@ -39,7 +39,7 @@ public class ReposPutter extends BaseManifestPutter {
 			boolean getCHKOnly2, RequestClient clientContext,
 			boolean earlyEncode, TempBucketFactory tempBucketFactory) {
 		super(cb, paramTrick(packList, db, tempBucketFactory), prioClass, target, defaultName, ctx, getCHKOnly2,
-				clientContext, earlyEncode);
+				clientContext, earlyEncode, false, null);
 	}
 
 	private static HashMap<String, Object> paramTrick(HashMap<String, FreenetURI> packList, Repository db, TempBucketFactory tbf) {
