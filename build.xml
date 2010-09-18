@@ -5,6 +5,7 @@
 
 	<property name="fred.jar.location" location="../fred/lib/FreenetService.jar"/>
 	<property name="framework.jar.location" location="../concierge/framework/dist/fconcierge.jar"/>
+	<property name="httpbundle.jar.location" location="../concierge/bundles/http/dist/concierge-http.jar"/>
 	<property name="servletapi.jar.location" location="../servlet-api-2.5/dist/servlet-api-2.5.jar"/>
 	<property name="jgit.jar.location" location="../jgit/dist/jgit.jar"/>
 
@@ -68,6 +69,7 @@
 		<javac srcdir="${src}" destdir="${build}" debug="on" optimize="on" source="${source-version}" target="${target-version}">
 			<classpath>
 				<pathelement location="${fred.jar.location}"/>
+				<pathelement location="${httpbundle.jar.location}"/>
 				<pathelement location="${servletapi.jar.location}"/>
 				<pathelement location="${jgit.jar.location}"/>
 				<pathelement location="${framework.jar.location}"/>
