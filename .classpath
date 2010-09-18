@@ -7,5 +7,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/jgit"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/concierge-framework"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/concierge-http"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/servlet-api-2.5"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
