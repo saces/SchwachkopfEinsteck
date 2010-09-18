@@ -13,6 +13,8 @@ import org.eclipse.jgit.http.server.resolver.ServiceNotEnabledException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.lib.RepositoryCache.FileKey;
+import org.eclipse.jgit.storage.file.FileRepository;
+import org.eclipse.jgit.util.FS;
 
 import freenet.keys.FreenetURI;
 import freenet.keys.InsertableUSK;
@@ -82,11 +84,11 @@ public class SimpleReposResolver implements RepositoryResolver {
 		try {
 			final File gitdir = new File(basePath, reposName);
 			if (!gitdir.exists()) {
-				db = new Repository(gitdir);
+				db = new FileRepository(gitdir);
 				db.create(true);
 				RepositoryCache.register(db);
 			} else {
-				db = RepositoryCache.open(FileKey.exact(gitdir), true);
+				db = RepositoryCache.open(FileKey.exact(gitdir, FS.DETECTED), true);
 			}
 		} catch (IOException e) {
 			throw new RepositoryNotFoundException(reposName, e);

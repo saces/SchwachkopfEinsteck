@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepository;
 
 import com.db4o.ObjectContainer;
 
@@ -85,7 +86,7 @@ public class RepositoryManager {
 				if (!reposDir.exists()) {
 					return null;
 				}
-				result = new Repository(reposDir);
+				result = new FileRepository(reposDir);
 				dbCache.put(name, result);
 			}
 		}
@@ -192,7 +193,7 @@ public class RepositoryManager {
 	public void tryCreateRepository(String reposName, String description) throws IOException {
 		File reposDir = new File(cacheDir, reposName);
 		Repository repos;
-		repos = new Repository(reposDir);
+		repos = new FileRepository(reposDir);
 		repos.create(true);
 		if (description != null) {
 			updateDescription(reposDir, description);

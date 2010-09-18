@@ -11,12 +11,12 @@ import java.util.Map;
 
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectDatabase;
-import org.eclipse.jgit.lib.ObjectDirectory;
-import org.eclipse.jgit.lib.PackFile;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevFlag;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.storage.file.ObjectDirectory;
+import org.eclipse.jgit.storage.file.PackFile;
 import org.eclipse.jgit.transport.RefAdvertiser;
 
 import freenet.client.InsertContext;
@@ -55,13 +55,14 @@ public class ReposPutter extends BaseManifestPutter {
 			String defaultName) {
 		TempBucketFactory tbf = (TempBucketFactory) manifestElements.get("tbf");
 		Repository db = (Repository) manifestElements.get("db");
+		@SuppressWarnings("unchecked")
 		HashMap<String, FreenetURI> packList = (HashMap<String, FreenetURI>) manifestElements.get("packList");
 
 		// make the default page
 		String defaultText = "This is a git repository.";
 		Bucket b = new ArrayBucket(defaultText.getBytes());
 		ManifestElement defaultItem = new ManifestElement("defaultText", b, "text/plain", b.size());
-		freenet.client.async.BaseManifestPutter.ContainerBuilder container = getRootContainer();
+		ContainerBuilder container = getRootContainer();
 		container.addItem("defaultText", defaultItem, true);
 
 		// generate info files for dumb servers (fproxy)

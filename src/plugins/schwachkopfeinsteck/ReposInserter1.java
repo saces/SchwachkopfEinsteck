@@ -11,12 +11,12 @@ import java.util.Map;
 
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectDatabase;
-import org.eclipse.jgit.lib.ObjectDirectory;
-import org.eclipse.jgit.lib.PackFile;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevFlag;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.storage.file.ObjectDirectory;
+import org.eclipse.jgit.storage.file.PackFile;
 import org.eclipse.jgit.transport.RefAdvertiser;
 
 import freenet.client.InsertContext;
@@ -57,6 +57,7 @@ public class ReposInserter1 extends BaseManifestPutter {
 		File reposDir = (File) manifestElements.get("rDir");
 		TempBucketFactory tbf = (TempBucketFactory) manifestElements.get("tbf");
 		Repository db = (Repository) manifestElements.get("db");
+		@SuppressWarnings("unchecked")
 		HashMap<String, FreenetURI> packList = (HashMap<String, FreenetURI>) manifestElements.get("packList");
 
 		// make the default page
