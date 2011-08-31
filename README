@@ -7,22 +7,15 @@ Prebuilt version: http://github.com/saces/SchwachkopfEinsteck/downloads
   Just load the latest, it should go intuitive…
 
 Source Version for the impatient:
-  Clone/update the repository, cd into it, update submodules and type 'ant'.
+  Clone/update the repository, cd into it and type 'ant'.
   Grab the plugin from dist/SchwachkopfEinsteck.jar and load it…
 
 get sources (a fresh clone):
-  get the super project
     git clone git://github.com/saces/SchwachkopfEinsteck.git SchwachkopfEinsteck
     cd SchwachkopfEinsteck
-  init and update submodules
-    git submodule init
-    git submodule update
 
 update sources:
-  update the super project
     git pull git://github.com/saces/SchwachkopfEinsteck.git
-  update submodules
-    git submodule update
 
 build:
   cd into the project root and type 'ant'.
@@ -35,7 +28,6 @@ configuration:
 
 Using It:
 
-  GO! GO! GO!
   go to http://127.0.0.1:8888/GitPlugin/repos (Menu->Git Tools->Repositories)
     create a new repository.
     copy the inserturi from sucess page
@@ -50,36 +42,6 @@ Using It:
     fetch is work in progress, so you have to pull/fetch remote repositories via fproxy for now
       git clone http://127.0.0.1:8888/USK@requesturi,ADC/name/0/
       git pull http://127.0.0.1:8888/USK@requesturi,ADC/name/0/
-
---obsolete--
-
-  Qualifying: (testing local repository creation, anonymous git transport)
-    go to http://127.0.0.1:8888/GitPlugin/repos (Menu->Git Tools->Repositories)
-    if any repository is left from warmup round, delete it
-    create a new repository.
-    for now the URIs are noted in the repository description.
-      git push git://127.0.0.1:9418/USK@crypticbitpuree,ABC/name/0/
-      git pull git://127.0.0.1:9418/USK@crypticbitpuree,ADC/name/0/
-
-  happy qualifying ;)
-
-  Warmup round: (testing the anonymous git transport)
-    create a bare repository in gitcache/test
-      cd <freenetdir>
-      mkdir gitcache
-      cd gitcache
-      mkdir test
-      cd test
-      git --bare init
-
-  the repository name ('test') is hardcoded for testing the anonymous git
-  transport. so any remote repository ends up in the repository you just
-  created.
-    git push git://127.0.0.1:9418/ignoredreposname
-    git pull git://127.0.0.1:9418/ignoredreposname
-
-  happy warm up testing ;)
-
 
 TODO & Issues
 =============
