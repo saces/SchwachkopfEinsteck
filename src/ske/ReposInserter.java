@@ -58,13 +58,14 @@ public class ReposInserter {
 		InsertContext iCtx = hlsc.getInsertContext(true);
 		iCtx.compressorDescriptor = "LZMA";
 		VerboseWaiter pw = new VerboseWaiter();
-		ReposPutter dmp = new ReposPutter(pw, packList, repos, (short) 1, insertURI.setMetaString(null), "index.html", iCtx, false, rc, false, hlsc.getTempBucketFactory());
+		ReposPutter dmp = new ReposPutter(pw, packList, repos, (short) 1, insertURI.setMetaString(null), "index.html", iCtx, false, rc, false, null /* FIXME null'ed in favour of early build: hlsc.getTempBucketFactory()*/);
 		iCtx.eventProducer.addEventListener(pw);
+		/* FIXME hack off in favour of early build
 		try {
 			hlsc.startPutter(dmp);
 		} catch (DatabaseDisabledException e) {
 			// Impossible
-		}
+		} */
 		FreenetURI result;
 		try {
 			result = pw.waitForCompletion();
@@ -122,13 +123,15 @@ public class ReposInserter {
 		ClientGetter get = new ClientGetter(fw, uri.setMetaString(new String[]{"fake"}), context, RequestStarter.INTERACTIVE_PRIORITY_CLASS, (RequestClient)hlsc, null, null);
 		get.setMetaSnoop(snooper);
 		try {
-			hlsc.startGetter(get);
+			// FIXME commented out in favour of early build
+			//hlsc.startGetter(get);
 			fw.waitForCompletion();
 		} catch (FetchException e) {
 			Logger.error(ReposInserter.class, "Fetch failure.", e);
+		/* FIXME commented out in favour of early build
 		} catch (DatabaseDisabledException e) {
 			// impossible
-			e.printStackTrace();
+			e.printStackTrace(); */
 		}
 
 		if (snooper.metaData == null) {
