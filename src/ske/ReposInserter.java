@@ -48,6 +48,9 @@ public class ReposInserter {
 			public boolean persistent() {
 				return false;
 			}
+			public boolean realTimeFlag() {
+				return true;
+			}
 			public void removeFrom(ObjectContainer container) {
 			}
 			
