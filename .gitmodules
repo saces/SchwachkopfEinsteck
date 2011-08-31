@@ -1,6 +1,0 @@
-[submodule "lib/ernie"]
-	path = lib/ernie
-	url = git://github.com/saces/ernie.git
-[submodule "lib/jgit"]
-	path = lib/jgit
-	url = git://github.com/saces/jgit.git
