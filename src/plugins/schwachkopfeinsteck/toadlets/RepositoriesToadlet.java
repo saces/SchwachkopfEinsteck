@@ -348,14 +348,14 @@ public class RepositoriesToadlet extends WebInterfaceToadlet {
 	private String getReposDescription(File dir) {
 		File descfile = new File(dir, "description");
 		if (!descfile.exists()) return "<Describe me!>";
-		String desc;
+		StringBuilder desc;
 		try {
 			desc = FileUtil.readUTF(descfile);
 		} catch (IOException e) {
 			Logger.error(this, "Error while reading repository description for: "+dir.getAbsolutePath(), e);
 			return "Error: "+e.getLocalizedMessage();
 		}
-		return desc;
+		return desc.toString();
 	}
 
 	private String getReposURI(File repos) {

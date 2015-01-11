@@ -21,11 +21,12 @@ import org.eclipse.jgit.transport.RefAdvertiser;
 
 import freenet.client.InsertContext;
 import freenet.client.async.BaseManifestPutter;
+import freenet.client.async.ClientContext;
 import freenet.client.async.ClientPutCallback;
-import freenet.client.async.ManifestElement;
+import freenet.client.async.TooManyFilesInsertException;
 import freenet.keys.FreenetURI;
-import freenet.node.RequestClient;
-import freenet.support.api.Bucket;
+import freenet.support.api.ManifestElement;
+import freenet.support.api.RandomAccessBucket;
 import freenet.support.io.ArrayBucket;
 import freenet.support.io.BucketTools;
 import freenet.support.io.Closer;
@@ -36,10 +37,9 @@ public class ReposInserter1 extends BaseManifestPutter {
 	public ReposInserter1(ClientPutCallback cb,
 			HashMap<String, FreenetURI> packList, File reposDir, Repository db, short prioClass,
 			FreenetURI target, String defaultName, InsertContext ctx,
-			boolean getCHKOnly2, RequestClient clientContext,
-			boolean earlyEncode, TempBucketFactory tempBucketFactory) {
-		super(cb, paramTrick(packList, reposDir, db, tempBucketFactory), prioClass, target, defaultName, ctx, getCHKOnly2,
-				clientContext, earlyEncode);
+			ClientContext clientContext, 
+			TempBucketFactory tempBucketFactory, boolean randomiseCryptoKeys, byte[] forceCryptoKey) throws TooManyFilesInsertException {
+		super(cb, paramTrick(packList, reposDir, db, tempBucketFactory), prioClass, target, defaultName, ctx, randomiseCryptoKeys, forceCryptoKey, clientContext);
 	}
 
 	private static HashMap<String, Object> paramTrick(HashMap<String, FreenetURI> packList, File reposDir, Repository db, TempBucketFactory tbf) {
@@ -61,7 +61,7 @@ public class ReposInserter1 extends BaseManifestPutter {
 
 		// make the default page
 		String defaultText = "This is a git repository.";
-		Bucket b = new ArrayBucket(defaultText.getBytes());
+		RandomAccessBucket b = new ArrayBucket(defaultText.getBytes());
 		ManifestElement defaultItem = new ManifestElement("defaultText", b, "text/plain", b.size());
 		freenet.client.async.BaseManifestPutter.ContainerBuilder container = getRootContainer();
 		container.addItem("defaultText", defaultItem, true);
@@ -71,14 +71,14 @@ public class ReposInserter1 extends BaseManifestPutter {
 		container.pushCurrentDir();
 		try {
 			// info/refs
-			Bucket refs = generateInfoRefs(db, tbf);
+			RandomAccessBucket refs = generateInfoRefs(db, tbf);
 			ManifestElement refsItem = new ManifestElement("refs", refs, "text/plain", refs.size());
 			container.makeSubDirCD("info");
 			container.addItem("refs", refsItem, false);
 			container.popCurrentDir();
 
 			// objects/info/packs
-			Bucket packs = generateObjectsInfoPacks(db, tbf);
+			RandomAccessBucket packs = generateObjectsInfoPacks(db, tbf);
 			ManifestElement packsItem = new ManifestElement("packs", packs, "text/plain", packs.size());
 			container.makeSubDirCD("objects");
 			container.makeSubDirCD("info");
@@ -92,8 +92,8 @@ public class ReposInserter1 extends BaseManifestPutter {
 		}
 	}
 
-	private Bucket generateInfoRefs(Repository db, TempBucketFactory tbf) throws IOException {
-		Bucket result = tbf.makeBucket(-1);
+	private RandomAccessBucket generateInfoRefs(Repository db, TempBucketFactory tbf) throws IOException {
+		RandomAccessBucket result = tbf.makeBucket(-1);
 		final RevWalk walk = new RevWalk(db);
 		final RevFlag ADVERTISED = walk.newFlag("ADVERTISED");
 
@@ -124,8 +124,8 @@ public class ReposInserter1 extends BaseManifestPutter {
 		return result;
 	}
 
-	private Bucket generateObjectsInfoPacks(Repository db, TempBucketFactory tbf) throws IOException {
-		Bucket result = tbf.makeBucket(-1);
+	private RandomAccessBucket generateObjectsInfoPacks(Repository db, TempBucketFactory tbf) throws IOException {
+		RandomAccessBucket result = tbf.makeBucket(-1);
 		
 		final OutputStreamWriter out = new OutputStreamWriter(new BufferedOutputStream(result.getOutputStream()), Constants.CHARSET);
 		final ObjectDatabase ob = db.getObjectDatabase();
@@ -175,13 +175,13 @@ public class ReposInserter1 extends BaseManifestPutter {
 	}
 
 	private void addFile(File file, ContainerBuilder container, TempBucketFactory tbf) throws IOException {
-		Bucket b = makeBucket(file, tbf);
+		RandomAccessBucket b = makeBucket(file, tbf);
 		ManifestElement me = new ManifestElement(file.getName(), b, "text/plain", b.size());
 		container.addItem(file.getName(), me, false);
 	}
 
-	private Bucket makeBucket(File file, TempBucketFactory tbf) throws IOException {
-		Bucket b = tbf.makeBucket(file.length());
+	private RandomAccessBucket makeBucket(File file, TempBucketFactory tbf) throws IOException {
+		RandomAccessBucket b = tbf.makeBucket(file.length());
 		InputStream is = new FileInputStream(file);
 		try {
 			BucketTools.copyFrom(b, is, Long.MAX_VALUE);
