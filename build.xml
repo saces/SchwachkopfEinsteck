@@ -4,7 +4,7 @@
 <project name="SchwachkopfEinsteck" default="dist" basedir=".">
 
 	<property name="fred.jar.location" location="../fred/dist/FreenetService.jar"/>
-	<property name="framework.jar.location" location="../concierge/framework/dist/fconcierge.jar"/>
+	<property name="framework.jar.location" location="../concierge/org.eclipse.concierge/dist/org.eclipse.concierge.jar"/>
 	<property name="httpbundle.jar.location" location="../concierge/bundles/http/dist/concierge-http.jar"/>
 	<property name="servletapi.jar.location" location="../servlet-api-2.5/dist/servlet-api-2.5.jar"/>
 	<property name="jgit.jar.location" location="../jgit/dist/jgit.jar"/>

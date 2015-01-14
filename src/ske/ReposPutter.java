@@ -21,7 +21,9 @@ import org.eclipse.jgit.transport.RefAdvertiser;
 
 import freenet.client.InsertContext;
 import freenet.client.async.BaseManifestPutter;
+import freenet.client.async.ClientContext;
 import freenet.client.async.ClientPutCallback;
+import freenet.client.async.TooManyFilesInsertException;
 import freenet.keys.FreenetURI;
 import freenet.node.RequestClient;
 import freenet.support.api.Bucket;
@@ -37,10 +39,9 @@ public class ReposPutter extends BaseManifestPutter {
 	public ReposPutter(ClientPutCallback cb,
 			HashMap<String, FreenetURI> packList, Repository db, short prioClass,
 			FreenetURI target, String defaultName, InsertContext ctx,
-			boolean getCHKOnly2, RequestClient clientContext,
-			boolean earlyEncode, TempBucketFactory tempBucketFactory) {
-		super(cb, paramTrick(packList, db, tempBucketFactory), prioClass, target, defaultName, ctx, getCHKOnly2,
-				clientContext, earlyEncode, false, null);
+			boolean getCHKOnly2, ClientContext clientContext,
+			boolean earlyEncode, TempBucketFactory tempBucketFactory) throws TooManyFilesInsertException {
+		super(cb, paramTrick(packList, db, tempBucketFactory), prioClass, target, defaultName, ctx, false, (byte[])null, clientContext);
 	}
 
 	private static HashMap<String, Object> paramTrick(HashMap<String, FreenetURI> packList, Repository db, TempBucketFactory tbf) {

@@ -23,6 +23,7 @@ import freenet.client.Metadata;
 import freenet.client.async.ClientContext;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.SnoopMetadata;
+import freenet.client.async.TooManyFilesInsertException;
 import freenet.keys.FreenetURI;
 import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
@@ -54,7 +55,12 @@ public class ReposInserter {
 		InsertContext iCtx = hlsc.getInsertContext(true);
 		iCtx.compressorDescriptor = "LZMA";
 		VerboseWaiter pw = new VerboseWaiter(rc);
-		ReposPutter dmp = new ReposPutter(pw, packList, repos, (short) 1, insertURI.setMetaString(null), "index.html", iCtx, false, rc, false, null /* FIXME null'ed in favour of early build: hlsc.getTempBucketFactory()*/);
+		try {
+			ReposPutter dmp = new ReposPutter(pw, packList, repos, (short) 1, insertURI.setMetaString(null), "index.html", iCtx, false, null /*ClientContext*/, false, null /* FIXME null'ed in favour of early build: hlsc.getTempBucketFactory()*/);
+		} catch (TooManyFilesInsertException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		iCtx.eventProducer.addEventListener(pw);
 		/* FIXME hack off in favour of early build
 		try {
