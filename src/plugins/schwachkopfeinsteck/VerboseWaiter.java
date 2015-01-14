@@ -8,24 +8,25 @@ import freenet.client.async.ClientContext;
 import freenet.client.events.ClientEvent;
 import freenet.client.events.ClientEventListener;
 import freenet.keys.FreenetURI;
+import freenet.node.RequestClient;
 import freenet.support.Logger;
 
 public class VerboseWaiter extends PutWaiter implements ClientEventListener {
 
-	public VerboseWaiter() {
-		super();
+	public VerboseWaiter(RequestClient client) {
+		super(client);
 	}
 
 	@Override
-	public void onFetchable(BaseClientPutter state, ObjectContainer container) {
+	public void onFetchable(BaseClientPutter state) {
 		Logger.error(this, "Put fetchable");
-		super.onFetchable(state, container);
+		super.onFetchable(state);
 	}
 
 	@Override
-	public synchronized void onGeneratedURI(FreenetURI uri, BaseClientPutter state, ObjectContainer container) {
+	public synchronized void onGeneratedURI(FreenetURI uri, BaseClientPutter state) {
 		Logger.error(this, "Got UriGenerated: "+uri.toString(false, false));
-		super.onGeneratedURI(uri, state, container);
+		super.onGeneratedURI(uri, state);
 	}
 
 	public void onRemoveEventProducer(ObjectContainer container) {
@@ -34,6 +35,12 @@ public class VerboseWaiter extends PutWaiter implements ClientEventListener {
 
 	public void receive(ClientEvent ce, ObjectContainer maybeContainer, ClientContext context) {
 		Logger.error(this, "Progress: "+ce.getDescription());
+	}
+
+	@Override
+	public void receive(ClientEvent ce, ClientContext context) {
+		// TODO Auto-generated method stub
+		Logger.error(this, "TODO ClientEvent", new Exception("TODO"));
 	}
 }
 

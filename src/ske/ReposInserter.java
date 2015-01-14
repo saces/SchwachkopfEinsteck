@@ -22,7 +22,6 @@ import freenet.client.InsertException;
 import freenet.client.Metadata;
 import freenet.client.async.ClientContext;
 import freenet.client.async.ClientGetter;
-import freenet.client.async.DatabaseDisabledException;
 import freenet.client.async.SnoopMetadata;
 import freenet.keys.FreenetURI;
 import freenet.node.RequestClient;
@@ -51,13 +50,10 @@ public class ReposInserter {
 			public boolean realTimeFlag() {
 				return true;
 			}
-			public void removeFrom(ObjectContainer container) {
-			}
-			
 		};
 		InsertContext iCtx = hlsc.getInsertContext(true);
 		iCtx.compressorDescriptor = "LZMA";
-		VerboseWaiter pw = new VerboseWaiter();
+		VerboseWaiter pw = new VerboseWaiter(rc);
 		ReposPutter dmp = new ReposPutter(pw, packList, repos, (short) 1, insertURI.setMetaString(null), "index.html", iCtx, false, rc, false, null /* FIXME null'ed in favour of early build: hlsc.getTempBucketFactory()*/);
 		iCtx.eventProducer.addEventListener(pw);
 		/* FIXME hack off in favour of early build
@@ -83,7 +79,7 @@ public class ReposInserter {
 
 	private static long getEditionHint(File repos) {
 		//ReentrantReadWriteLock lock = getRRWLock(repos.getName());
-		String hint;
+		StringBuilder hint;
 		//synchronized (lock) {
 			File hintfile = new File(repos, "EditionHint");
 			if (!hintfile.exists()) {
@@ -96,7 +92,7 @@ public class ReposInserter {
 				return -1;
 			}
 		//}
-		return Fields.parseLong(hint, -1);
+		return Fields.parseLong(hint.toString(), -1);
 	}
 
 	public static class Snooper implements SnoopMetadata {
@@ -105,7 +101,7 @@ public class ReposInserter {
 		Snooper() {
 		}
 
-		public boolean snoopMetadata(Metadata meta, ObjectContainer container, ClientContext context) {
+		public boolean snoopMetadata(Metadata meta, ClientContext context) {
 			if (meta.isSimpleManifest()) {
 				metaData = meta;
 				return true;
@@ -119,8 +115,17 @@ public class ReposInserter {
 		// get the list for reusing pack files
 		Snooper snooper = new Snooper();
 		FetchContext context = hlsc.getFetchContext();
-		FetchWaiter fw = new FetchWaiter();
-		ClientGetter get = new ClientGetter(fw, uri.setMetaString(new String[]{"fake"}), context, RequestStarter.INTERACTIVE_PRIORITY_CLASS, (RequestClient)hlsc, null, null);
+
+		RequestClient rc = new RequestClient() {
+			public boolean persistent() {
+				return false;
+			}
+			public boolean realTimeFlag() {
+				return true;
+			}
+		};
+		FetchWaiter fw = new FetchWaiter(rc);
+		ClientGetter get = new ClientGetter(fw, uri.setMetaString(new String[]{"fake"}), context, RequestStarter.INTERACTIVE_PRIORITY_CLASS, null, null);
 		get.setMetaSnoop(snooper);
 		try {
 			// FIXME commented out in favour of early build

@@ -12,8 +12,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepository;
 
-import com.db4o.ObjectContainer;
-
 import freenet.client.FetchContext;
 import freenet.client.FetchException;
 import freenet.client.FetchWaiter;
@@ -23,8 +21,9 @@ import freenet.client.Metadata;
 import freenet.client.async.ClientContext;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientRequester;
-import freenet.client.async.DatabaseDisabledException;
+import freenet.client.async.PersistenceDisabledException;
 import freenet.client.async.SnoopMetadata;
+import freenet.client.async.TooManyFilesInsertException;
 import freenet.keys.FreenetURI;
 import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
@@ -170,7 +169,7 @@ public class RepositoryManager {
 
 	private long getEditionHint(File repos) {
 		ReentrantReadWriteLock lock = getRRWLock(repos.getName());
-		String hint;
+		StringBuilder hint;
 		synchronized (lock) {
 			File hintfile = new File(repos, "EditionHint");
 			if (!hintfile.exists()) {
@@ -183,7 +182,7 @@ public class RepositoryManager {
 				return -1;
 			}
 		}
-		return Fields.parseLong(hint, -1);
+		return Fields.parseLong(hint.toString(), -1);
 	}
 
 	private void tryCreateRepository(String reposName) throws IOException {
@@ -223,26 +222,37 @@ public class RepositoryManager {
 		}
 
 		RequestClient rc = new RequestClient() {
+			@Override
 			public boolean persistent() {
 				return false;
 			}
+			@Override
 			public boolean realTimeFlag() {
-				return true;
-			}
-			public void removeFrom(ObjectContainer container) {
+				return false;
 			}
 			
 		};
+		 ClientContext x = pluginContext.clientCore.clientContext;
 		InsertContext iCtx = pluginContext.hlsc.getInsertContext(true);
 		iCtx.compressorDescriptor = "LZMA";
-		VerboseWaiter pw = new VerboseWaiter();
-		ReposInserter1 dmp = new ReposInserter1(pw, packList, reposDir, rw.db, (short) 1, insertURI.setMetaString(null), "index.html", iCtx, false, rc, false, pluginContext.clientCore.tempBucketFactory);
+		VerboseWaiter pw = new VerboseWaiter(rc);
+		ReposInserter1 dmp = null;
+		try {
+			dmp = new ReposInserter1(pw, packList, reposDir, rw.db, (short) 1, insertURI.setMetaString(null), "index.html", iCtx, pluginContext.clientCore.clientContext, pluginContext.clientCore.tempBucketFactory, false, (byte[])null);
+		} catch (TooManyFilesInsertException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
 		iCtx.eventProducer.addEventListener(pw);
+		
 		try {
 			pluginContext.clientCore.clientContext.start(dmp);
-		} catch (DatabaseDisabledException e) {
-			// Impossible
+		} catch (PersistenceDisabledException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+		
 		FreenetURI result;
 		try {
 			result = pw.waitForCompletion();
@@ -264,7 +274,7 @@ public class RepositoryManager {
 		Snooper() {
 		}
 
-		public boolean snoopMetadata(Metadata meta, ObjectContainer container, ClientContext context) {
+		public boolean snoopMetadata(Metadata meta, ClientContext context) {
 			if (meta.isSimpleManifest()) {
 				metaData = meta;
 				return true;
@@ -275,14 +285,25 @@ public class RepositoryManager {
 
 	// get the fragment 'pack files list' from metadata, expect a ssk
 	private HashMap<String, FreenetURI> getPackList(FreenetURI uri) {
+		RequestClient rc = new RequestClient() {
+			@Override
+			public boolean persistent() {
+				return false;
+			}
+			@Override
+			public boolean realTimeFlag() {
+				return false;
+			}
+			
+		};
 		// get the list for reusing pack files
 		Snooper snooper = new Snooper();
 		FetchContext context = pluginContext.hlsc.getFetchContext();
-		FetchWaiter fw = new FetchWaiter();
-		ClientGetter get = new ClientGetter(fw, uri.setMetaString(new String[]{"fake"}), context, RequestStarter.INTERACTIVE_PRIORITY_CLASS, (RequestClient)pluginContext.hlsc, null, null);
+		FetchWaiter fw = new FetchWaiter(rc);
+		ClientGetter get = new ClientGetter(fw, uri.setMetaString(new String[]{"fake"}), context, RequestStarter.INTERACTIVE_PRIORITY_CLASS, null);
 		get.setMetaSnoop(snooper);
 		try {
-			get.start(null, pluginContext.clientCore.clientContext);
+			get.start(pluginContext.clientCore.clientContext);
 			fw.waitForCompletion();
 		} catch (FetchException e) {
 			Logger.error(this, "Fetch failure.", e);
