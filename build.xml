@@ -2,6 +2,9 @@
 <!-- ant build file for SchwachkopfEinsteck -->
 
 <project name="SchwachkopfEinsteck" default="dist" basedir=".">
+
+    <property file="override.properties" />
+
 	<property name="freenet-cvs-snapshot.location" location="../fred/lib/freenet-cvs-snapshot.jar"/>
 	<property name="freenet-ext.location" location="../fred/lib/freenet-ext.jar"/>
 	<property name="svn.revision" value="@custom@"/>
