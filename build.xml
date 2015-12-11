@@ -70,7 +70,7 @@
 		</javac>
 
 		<!-- FIXME: remove the debug and replace with optimize -->
-		<javac srcdir="lib/jzlib" destdir="${build}" debug="on" optimize="on" source="${source-version}" target="${target-version}">
+		<javac srcdir="lib/jzlib/src/main/java" destdir="${build}" debug="on" optimize="on" source="${source-version}" target="${target-version}">
 			<classpath>
 				<pathelement location="${freenet-ext.location}"/>
 				<pathelement location="${freenet-cvs-snapshot.location}"/>
