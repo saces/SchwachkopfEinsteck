@@ -70,6 +70,12 @@ public class AnonymousGitService implements AbstractService {
 		}
 
 		String req[] = cmd.split(" ");
+		if (req.length != 2) {
+			Logger.error(this, "Malformed request: " + cmd);
+			fatal(rawOut, "Malformed request.");
+			return;
+		}
+
 		String command = req[0].startsWith("git-") ? req[0] : "git-" + req[0];
 		String reposName = req[1];
 
