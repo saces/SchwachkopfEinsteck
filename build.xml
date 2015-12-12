@@ -22,6 +22,13 @@
 	<available file="src/plugins/schwachkopfeinsteck/Version.java" property="version.present"/>
 	<available file="${junit.location}" property="junit.present"/>
 
+    <property name="bundle.jgit.version" value="4.1.1.201511131810-r"/>
+    <property name="bundle.jgit.location" location="${lib}/org.eclipse.jgit-${bundle.jgit.version}.jar"/>
+    <property name="bundle.jgit.location.ide" location="${lib}/org.eclipse.jgit.jar"/>
+
+    <property name="bundle.slf4j.version" value="1.7.13"/>
+    <property name="bundle.slf4j.location" location="${lib}/slf4j-api-${bundle.slf4j.version}.jar"/>
+
 	<exec executable="git"
 		failifexecutionfails="false"
 		errorProperty="git.errror"
@@ -47,6 +54,30 @@
 		<echo message="Using ${freenet-cvs-snapshot.location} as freenet-cvs-snapshot.jar"/>
 		<echo message="Using ${freenet-ext.location} as freenet-ext.jar"/>
 	</target>
+
+	<target name="env" depends="mkdir"   description="Learn about the environment">
+        <available file="${bundle.jgit.location}" property="bundle.jgit.present"/>
+        <available file="${bundle.slf4j.location}" property="bundle.slf4j.present"/>
+    </target>
+
+	<target name="download-jgit" depends="env" unless="bundle.jgit.present" description="Get Jgit">
+        <get src="https://repo.eclipse.org/content/groups/releases//org/eclipse/jgit/org.eclipse.jgit/${bundle.jgit.version}/org.eclipse.jgit-${bundle.jgit.version}.jar"
+            dest="${bundle.jgit.location}"
+            verbose="true"
+            usetimestamp="true"/>
+    </target>
+
+	<target name="get-jgit" depends="download-jgit">
+	    <!-- To Ease the build and update process the symlink is recreated each time -->
+        <symlink link="${bundle.jgit.location.ide}" resource="${bundle.jgit.location}" overwrite="true" failonerror="true"/>
+    </target>
+
+	<target name="get-slf4j" depends="env" unless="bundle.slf4j.present" description="Get slf4j">
+        <get src="https://repo1.maven.org/maven2/org/slf4j/slf4j-api/${bundle.slf4j.version}/slf4j-api-${bundle.slf4j.version}.jar"
+            dest="${bundle.slf4j.location}"
+            verbose="true"
+            usetimestamp="true"/>
+    </target>
 
 	<!-- ================================================== -->
 	<target name="compile" depends="mkdir" >
@@ -94,17 +125,6 @@
 		</javac>
 
 		<!-- FIXME: remove the debug and replace with optimize -->
-		<javac srcdir="lib/jgit/org.eclipse.jgit/src" destdir="${build}" debug="on" optimize="on" source="${source-version}" target="${target-version}">
-			<classpath>
-				<pathelement location="${freenet-ext.location}"/>
-				<pathelement location="${freenet-cvs-snapshot.location}"/>
-			</classpath>
-			<include name="**/*.java"/>
-			<exclude name="**/*Test.java"/>
-			<exclude name="${version.src}"/>
-		</javac>
-
-		<!-- FIXME: remove the debug and replace with optimize -->
 		<javac srcdir="lib/ernie/src" destdir="${build}" debug="on" optimize="on" source="${source-version}" target="${target-version}">
 			<classpath>
 				<pathelement location="${freenet-ext.location}"/>
@@ -120,6 +140,7 @@
 			<classpath>
 				<pathelement location="${freenet-ext.location}"/>
 				<pathelement location="${freenet-cvs-snapshot.location}"/>
+				<pathelement location="${bundle.jgit.location}"/>
 				<pathelement location="lib/jgit/org.eclipse.jgit/src"/>
 			</classpath>
 			<include name="**/*.java"/>
@@ -166,7 +187,7 @@
 	</target>
 
 	<!-- ================================================== -->
-	<target name="dist" depends="compile,junit"
+	<target name="dist" depends="compile,get-jgit,get-slf4j"
 		description="generate the distribution" >
 		<jar jarfile="${dist}/SchwachkopfEinsteck.jar" duplicate="fail">
 			<manifest>
@@ -176,6 +197,12 @@
 				<include name="*.txt"/>
 			</fileset>
 			<fileset dir="${build}/"/>
+			<zipfileset src="${bundle.jgit.location}">
+			    <include name="org/**"/>
+			</zipfileset>
+			<zipfileset src="${bundle.slf4j.location}">
+                <include name="org/**"/>
+            </zipfileset>
 		</jar>
 	</target>
 

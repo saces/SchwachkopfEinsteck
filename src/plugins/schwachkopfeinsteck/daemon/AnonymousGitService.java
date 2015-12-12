@@ -243,9 +243,10 @@ public class AnonymousGitService implements AbstractService {
 	}
 
 	private void handleGitUploadPack(Repository db, InputStream rawIn, OutputStream rawOut) throws IOException {
-		final UploadPack rp = new UploadPack(db);
-		//rp.setTimeout(Daemon.this.getTimeout());
-		rp.upload(rawIn, rawOut, null);
+		final UploadPack up = new UploadPack(db);
+		//up.setTimeout(Daemon.this.getTimeout());
+		//up.setPackConfig(getPackConfig());
+		up.upload(rawIn, rawOut, null);
 	}
 
 	private boolean handleGitReceivePack(final Repository db, InputStream rawIn, OutputStream rawOut) throws IOException {
@@ -255,11 +256,13 @@ public class AnonymousGitService implements AbstractService {
 		rp.setRefLogIdent(new PersonIdent(name, email));
 		//rp.setTimeout(Daemon.this.getTimeout());
 		rp.receive(rawIn, rawOut, null);
-		try {
-			rp.getNewObjectIds();
-		} catch ( NullPointerException npe) {
-			return false;
-		}
+		// TODO figure out hox to check for new objects
+		// for now each push does an upload
+//		try {
+//			rp.getNewObjectIds();
+//		} catch ( NullPointerException npe) {
+//			return false;
+//		}
 		return true;
 	}
 

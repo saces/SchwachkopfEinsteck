@@ -9,10 +9,10 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jgit.internal.storage.file.ObjectDirectory;
+import org.eclipse.jgit.internal.storage.file.PackFile;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectDatabase;
-import org.eclipse.jgit.lib.ObjectDirectory;
-import org.eclipse.jgit.lib.PackFile;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevFlag;
@@ -113,7 +113,7 @@ public class ReposInserter1 extends BaseManifestPutter {
 				// No end marker required for info/refs format.
 			}
 		};
-		adv.init(walk, ADVERTISED);
+		adv.init(db);
 		adv.setDerefTags(true);
 
 		Map<String, Ref> refs = db.getAllRefs();
