@@ -233,7 +233,7 @@ public class RepositoryManager {
 			}
 			
 		};
-		 ClientContext x = pluginContext.clientCore.clientContext;
+		ClientContext x = pluginContext.clientCore.clientContext;
 		InsertContext iCtx = pluginContext.hlsc.getInsertContext(true);
 		iCtx.compressorDescriptor = "LZMA";
 		VerboseWaiter pw = new VerboseWaiter(rc);
@@ -244,16 +244,16 @@ public class RepositoryManager {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		
+
 		iCtx.eventProducer.addEventListener(pw);
-		
+
 		try {
 			pluginContext.clientCore.clientContext.start(dmp);
 		} catch (PersistenceDisabledException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+
 		FreenetURI result;
 		try {
 			result = pw.waitForCompletion();
