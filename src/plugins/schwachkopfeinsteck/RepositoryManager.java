@@ -37,7 +37,7 @@ public class RepositoryManager {
 	private static volatile boolean logDEBUG;
 
 	static {
-		Logger.registerClass(GitPlugin.class);
+		Logger.registerClass(RepositoryManager.class);
 	}
 
 	public static class RepositoryWrapper {
