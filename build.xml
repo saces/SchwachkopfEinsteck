@@ -14,6 +14,7 @@
 	<property name="build-test" location="build-test/"/>
 	<property name="dist" location="dist/"/>
 	<property name="src" location="src/"/>
+	<property name="lib" location="osgi-lib/"/>
 	<property name="junit.location" value="/usr/share/java/junit.jar"/>
 	<property name="version.src" value="plugins/schwachkopfeinsteck/Version.java" />
 	<property name="version.build" value="plugins/schwachkopfeinsteck/Version.class" />
@@ -42,6 +43,7 @@
 		<mkdir dir="${build}"/>
 		<mkdir dir="${build-test}"/>
 		<mkdir dir="${dist}"/>
+		<mkdir dir="${lib}"/>
 		<echo message="Using ${freenet-cvs-snapshot.location} as freenet-cvs-snapshot.jar"/>
 		<echo message="Using ${freenet-ext.location} as freenet-ext.jar"/>
 	</target>

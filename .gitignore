@@ -2,3 +2,4 @@
 /build-test
 /dist
 override.properties
+/osgi-lib
