@@ -55,15 +55,19 @@ public class AnonymousGitService implements AbstractService {
 		OutputStream rawOut = new BufferedOutputStream(sock.getOutputStream());
 
 		String cmd = new PacketLineIn(rawIn).readStringRaw();
+		if (logDEBUG) {
+			Logger.debug(this, "Incomming request: " + cmd);
+		}
 		final int nul = cmd.indexOf('\0');
 		if (nul >= 0) {
 			// Newer clients hide a "host" header behind this byte.
 			// Currently we don't use it for anything, so we ignore
 			// this portion of the command.
 			cmd = cmd.substring(0, nul);
+			if (logDEBUG) {
+				Logger.debug(this, "Request did contain a hidden host, truncating: " + cmd);
+			}
 		}
-
-		//System.out.println("x händle request:"+cmd);
 
 		String req[] = cmd.split(" ");
 		String command = req[0].startsWith("git-") ? req[0] : "git-" + req[0];
@@ -172,6 +176,10 @@ public class AnonymousGitService implements AbstractService {
 				newLock.lock();
 				lock.unlock();
 				lock = newLock;
+
+				if (logDEBUG) {
+					Logger.debug(this, "Do upload.");
+				}
 
 				try {
 					repositoryManager.insert(rW, fetchUri, insertUri);
