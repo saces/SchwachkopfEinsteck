@@ -40,7 +40,7 @@ public class VerboseWaiter extends PutWaiter implements ClientEventListener {
 	@Override
 	public void receive(ClientEvent ce, ClientContext context) {
 		// TODO Auto-generated method stub
-		Logger.error(this, "TODO ClientEvent", new Exception("TODO"));
+		Logger.error(this, "TODO ClientEvent :"+ce.getDescription(), new Exception("TODO"));
 	}
 }
 
