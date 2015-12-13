@@ -164,7 +164,7 @@ public class ReposInserter1 extends BaseManifestPutter {
 		File[] files = dir.listFiles();
 		for (File file : files) {
 			String name = file.getName();
-			if (packList.containsKey(name)) {
+			if (packList != null && packList.containsKey(name)) {
 				FreenetURI target = packList.get(name);
 				ManifestElement me = new ManifestElement(file.getName(), target, "text/plain");
 				container.addItem(file.getName(), me, false);
